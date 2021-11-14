@@ -27,13 +27,20 @@ add_1_svc(struct UserPackage *argp, struct svc_req *rqstp)
 	 * insert server code here
 	 */
 	struct SensorData data = argp->data;
+	struct SensorData newData;
 	std::cout << "Received data from user: " << argp->name << std::endl;
 	std::cout << "Here are the received values: ";
+	newData.dataId = data.dataId;
+	newData.noValues = data.noValues;
+	newData.value.value_len = data.noValues;
+	newData.value.value_val = new float[data.noValues];
 	for (int i = 0; i < data.noValues; i++) {
 		std::cout << data.value.value_val[i] << " ";
+		newData.value.value_val[i] = data.value.value_val[i];
 	}
 
-	dataBase[argp->name][data.dataId] = data;
+
+	dataBase[argp->name][data.dataId] = newData;
 
 	std::cout << std::endl;
 
