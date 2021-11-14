@@ -30,6 +30,7 @@ rpc_db_1(struct svc_req *rqstp, register SVCXPRT *transp)
 		char *store_1_arg;
 		char *login_1_arg;
 		char *logout_1_arg;
+		char *readall_1_arg;
 	} argument;
 	char *result;
 	xdrproc_t _xdr_argument, _xdr_result;
@@ -60,7 +61,7 @@ rpc_db_1(struct svc_req *rqstp, register SVCXPRT *transp)
 
 	case READ:
 		_xdr_argument = (xdrproc_t) xdr_SpecificId;
-		_xdr_result = (xdrproc_t) xdr_int;
+		_xdr_result = (xdrproc_t) xdr_wrapstring;
 		local = (char *(*)(char *, struct svc_req *)) read_1_svc;
 		break;
 
@@ -98,6 +99,12 @@ rpc_db_1(struct svc_req *rqstp, register SVCXPRT *transp)
 		_xdr_argument = (xdrproc_t) xdr_wrapstring;
 		_xdr_result = (xdrproc_t) xdr_int;
 		local = (char *(*)(char *, struct svc_req *)) logout_1_svc;
+		break;
+
+	case READALL:
+		_xdr_argument = (xdrproc_t) xdr_wrapstring;
+		_xdr_result = (xdrproc_t) xdr_wrapstring;
+		local = (char *(*)(char *, struct svc_req *)) readall_1_svc;
 		break;
 
 	default:

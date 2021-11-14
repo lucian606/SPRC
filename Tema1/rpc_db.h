@@ -50,8 +50,8 @@ extern  int * delete_1_svc(struct SpecificId *, struct svc_req *);
 extern  int * update_1(struct UserPackage *, CLIENT *);
 extern  int * update_1_svc(struct UserPackage *, struct svc_req *);
 #define READ 4
-extern  int * read_1(struct SpecificId *, CLIENT *);
-extern  int * read_1_svc(struct SpecificId *, struct svc_req *);
+extern  char ** read_1(struct SpecificId *, CLIENT *);
+extern  char ** read_1_svc(struct SpecificId *, struct svc_req *);
 #define GETSTAT 5
 extern  char ** getstat_1(struct SpecificId *, CLIENT *);
 extern  char ** getstat_1_svc(struct SpecificId *, struct svc_req *);
@@ -70,6 +70,9 @@ extern  int * login_1_svc(char **, struct svc_req *);
 #define LOGOUT 10
 extern  int * logout_1(char **, CLIENT *);
 extern  int * logout_1_svc(char **, struct svc_req *);
+#define READALL 11
+extern  char ** readall_1(char **, CLIENT *);
+extern  char ** readall_1_svc(char **, struct svc_req *);
 extern int rpc_db_1_freeresult (SVCXPRT *, xdrproc_t, caddr_t);
 
 #else /* K&R C */
@@ -83,8 +86,8 @@ extern  int * delete_1_svc();
 extern  int * update_1();
 extern  int * update_1_svc();
 #define READ 4
-extern  int * read_1();
-extern  int * read_1_svc();
+extern  char ** read_1();
+extern  char ** read_1_svc();
 #define GETSTAT 5
 extern  char ** getstat_1();
 extern  char ** getstat_1_svc();
@@ -103,6 +106,9 @@ extern  int * login_1_svc();
 #define LOGOUT 10
 extern  int * logout_1();
 extern  int * logout_1_svc();
+#define READALL 11
+extern  char ** readall_1();
+extern  char ** readall_1_svc();
 extern int rpc_db_1_freeresult ();
 #endif /* K&R C */
 

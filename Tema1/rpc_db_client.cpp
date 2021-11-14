@@ -104,10 +104,10 @@ int add(char *host, char *username, struct SensorData entry) {
 	return *result_1;
 }
 
-int read(char *host, char *username, int dataId) {
+void read(char *host, char *username, int dataId) {
 	
 	CLIENT *clnt;
-	int *result_1;
+	char **result_1;
 	struct SpecificId p = {dataId, username};
 	//for (int i = 0; i < entry.noValues; i++)
 	//	std::cout << p.data.value[i] << std::endl;
@@ -121,13 +121,44 @@ int read(char *host, char *username, int dataId) {
 #endif	/* DEBUG */
 
 	result_1 = read_1(&p, clnt);
+	if (result_1 == (char **) NULL) {
+		clnt_perror (clnt, "call failed");
+	} else if (strcmp(*result_1, "ERROR")) {
+			std::cout << "Data read successfully" << std::endl;
+			std::cout << *result_1;
+	} else {
+				std::cout << "Invalid id, the entry doesn't exist\n";
+	}
+
+#ifndef	DEBUG
+	clnt_destroy (clnt);
+#endif	 /* DEBUG */
+	//return *result_1;
+}
+
+int update(char *host, char *username, struct SensorData entry) {
+	CLIENT *clnt;
+	int *result_1;
+	struct UserPackage p = {entry, username};
+	//for (int i = 0; i < entry.noValues; i++)
+	//	std::cout << p.data.value[i] << std::endl;
+
+#ifndef	DEBUG
+	clnt = clnt_create (host, RPC_DB, RPC_DB_VERS, "udp");
+	if (clnt == NULL) {
+		clnt_pcreateerror (host);
+		exit (1);
+	}
+#endif	/* DEBUG */
+
+	result_1 = update_1(&p, clnt);
 	if (result_1 == (int *) NULL) {
 		clnt_perror (clnt, "call failed");
 	} else {
 		if (*result_1 == ERROR) {
-			std::cout << "Error while reading data" << std::endl;
+			std::cout << "Error while updating data" << std::endl;
 		} else {
-			std::cout << "Data read successfully" << std::endl;
+			std::cout << "Data entry updated successfully" << std::endl;
 		}
 	}
 

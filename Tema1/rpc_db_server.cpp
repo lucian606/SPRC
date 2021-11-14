@@ -21,7 +21,7 @@ std::map<std::string, std::map<int, struct SensorData>> dataBase;
 int *
 add_1_svc(struct UserPackage *argp, struct svc_req *rqstp)
 {
-	static int  result;
+	static int result = OK;
 
 	/*
 	 * insert server code here
@@ -64,33 +64,61 @@ update_1_svc(struct UserPackage *argp, struct svc_req *rqstp)
 {
 	static int  result;
 
-	/*
-	 * insert server code here
-	 */
+	struct SensorData data = argp->data;
+	struct SensorData newData;
+	std::cout << "Received data from user: " << argp->name << std::endl;
+	std::cout << "Here are the received values: ";
+	newData.dataId = data.dataId;
+	newData.noValues = data.noValues;
+	newData.value.value_len = data.noValues;
+	newData.value.value_val = new float[data.noValues];
+	for (int i = 0; i < data.noValues; i++) {
+		std::cout << data.value.value_val[i] << " ";
+		newData.value.value_val[i] = data.value.value_val[i];
+	}
+
+
+	dataBase[argp->name][data.dataId] = newData;
+
+	std::cout << std::endl;
 
 	return &result;
 }
 
-int *
+char **
 read_1_svc(struct SpecificId *argp, struct svc_req *rqstp)
 {
-	static int  result;
+	static char *result;
 
 	/*
 	 * insert server code here
 	 */
+
+	if (dataBase.find(argp->name) == dataBase.end() || 
+			dataBase[argp->name].find(argp->dataId) == dataBase[argp->name].end()) {
+		result = (char *) calloc(7, sizeof(char));			
+		std::cout << "User wants to read unexisting data: " << argp->name << std::endl;
+		strcpy(result, "ERROR");
+		return &result;
+	}
+	
 	int noValues = dataBase[argp->name][argp->dataId].noValues;
 	float *values = dataBase[argp->name][argp->dataId].value.value_val;
-
+	std::string resultStr;
 	std::cout << "User wants to read data: " << argp->name << std::endl;
 
-	std::cout << "  Data id: " << argp->dataId << std::endl;
-	std::cout << "  Data size: " << dataBase[argp->name][argp->dataId].noValues << std::endl;
-	std::cout << "  Data: ";
-	for (int i = 0; i < noValues; i++)
-		std::cout << values[i] << " ";
-	std::cout << std::endl;
+	resultStr += "  Data id: " + std::to_string(argp->dataId) + '\n';
+	resultStr += "  Data size: " + std::to_string(dataBase[argp->name][argp->dataId].noValues) + '\n';
+	resultStr += "  Data: ";
 
+	for (int i = 0; i < noValues; i++)
+		resultStr = resultStr + std::to_string(values[i]) + " ";
+
+	resultStr += '\n';
+	std::cout << resultStr;	
+	resultStr = "Here is the received data:\n" + resultStr;
+	result = (char *) calloc(resultStr.size() + 1, sizeof(char));	
+	strcpy(result, resultStr.c_str());
 	return &result;
 }
 
@@ -183,6 +211,18 @@ logout_1_svc(char **argp, struct svc_req *rqstp)
 		result = OK;
 	}
 
+
+	return &result;
+}
+
+char **
+readall_1_svc(char **argp, struct svc_req *rqstp)
+{
+	static char * result;
+
+	/*
+	 * insert server code here
+	 */
 
 	return &result;
 }

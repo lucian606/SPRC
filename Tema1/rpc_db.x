@@ -27,12 +27,13 @@ program RPC_DB
         int ADD(struct UserPackage) = 1;
         int DELETE(struct SpecificId) = 2;
         int UPDATE(struct UserPackage) = 3;
-        int READ(struct SpecificId) = 4;
+        string READ(struct SpecificId) = 4;
         string GETSTAT(struct SpecificId) = 5;
         string GETSTATALL(string) = 6;
         int LOAD(string) = 7;
         string STORE(string) = 8;
         int LOGIN(string) = 9;
         int LOGOUT(string) = 10;
+        string READALL(string) = 11;
     } = 1;
 } = 1;
