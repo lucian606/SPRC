@@ -16,7 +16,7 @@
 int currentId = 0;
 
 std::map<std::string, int> loggedUsers;
-std::map<std::string, std::map<std::string, struct SensorData>> dataBase;
+std::map<std::string, std::map<int, struct SensorData>> dataBase;
 
 int *
 add_1_svc(struct UserPackage *argp, struct svc_req *rqstp)
@@ -26,6 +26,16 @@ add_1_svc(struct UserPackage *argp, struct svc_req *rqstp)
 	/*
 	 * insert server code here
 	 */
+	struct SensorData data = argp->data;
+	std::cout << "Received data from user: " << argp->name << std::endl;
+	std::cout << "Here are the received values: ";
+	for (int i = 0; i < data.noValues; i++) {
+		std::cout << data.value.value_val[i] << " ";
+	}
+
+	dataBase[argp->name][data.dataId] = data;
+
+	std::cout << std::endl;
 
 	return &result;
 }
@@ -62,6 +72,17 @@ read_1_svc(struct SpecificId *argp, struct svc_req *rqstp)
 	/*
 	 * insert server code here
 	 */
+	int noValues = dataBase[argp->name][argp->dataId].noValues;
+	float *values = dataBase[argp->name][argp->dataId].value.value_val;
+
+	std::cout << "User wants to read data: " << argp->name << std::endl;
+
+	std::cout << "  Data id: " << argp->dataId << std::endl;
+	std::cout << "  Data size: " << dataBase[argp->name][argp->dataId].noValues << std::endl;
+	std::cout << "  Data: ";
+	for (int i = 0; i < noValues; i++)
+		std::cout << values[i] << " ";
+	std::cout << std::endl;
 
 	return &result;
 }

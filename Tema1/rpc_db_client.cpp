@@ -104,6 +104,39 @@ int add(char *host, char *username, struct SensorData entry) {
 	return *result_1;
 }
 
+int read(char *host, char *username, int dataId) {
+	
+	CLIENT *clnt;
+	int *result_1;
+	struct SpecificId p = {dataId, username};
+	//for (int i = 0; i < entry.noValues; i++)
+	//	std::cout << p.data.value[i] << std::endl;
+
+#ifndef	DEBUG
+	clnt = clnt_create (host, RPC_DB, RPC_DB_VERS, "udp");
+	if (clnt == NULL) {
+		clnt_pcreateerror (host);
+		exit (1);
+	}
+#endif	/* DEBUG */
+
+	result_1 = read_1(&p, clnt);
+	if (result_1 == (int *) NULL) {
+		clnt_perror (clnt, "call failed");
+	} else {
+		if (*result_1 == ERROR) {
+			std::cout << "Error while reading data" << std::endl;
+		} else {
+			std::cout << "Data read successfully" << std::endl;
+		}
+	}
+
+#ifndef	DEBUG
+	clnt_destroy (clnt);
+#endif	 /* DEBUG */
+	return *result_1;
+}
+
 int main(int argc, char *argv[]) {
 	char *host;
 
@@ -133,23 +166,30 @@ int main(int argc, char *argv[]) {
 		}
 
 		else if (command == "add") {
-			// if (userKey < 0) {
-			// 	std::cout << unauthorized_msg;
-			// 	continue;
-			// }
-			// int dataId;
-			// int noValues;
-			// float *values;
-			// std::cin >> dataId;
-			// std::cin >> noValues;
-			// struct SensorData entry;
-			// entry.dataId = dataId;
-			// entry.noValues = noValues;
-			// entry.value = new float[noValues + 1];
-			// for (int i = 0; i < noValues; ++i) {
-			// 	std::cin >> entry.value[i];
-			// }
-			// add(host, username, entry);
+			if (userKey < 0) {
+				std::cout << unauthorized_msg;
+				continue;
+			}
+			int dataId;
+			int noValues;
+			float *values;
+			std::cin >> dataId;
+			std::cin >> noValues;
+			struct SensorData entry;
+			entry.dataId = dataId;
+			entry.noValues = noValues;
+			entry.value.value_len = noValues;
+			entry.value.value_val = new float[noValues + 1];
+			for (int i = 0; i < noValues; ++i) {
+				std::cin >> entry.value.value_val[i];
+			}
+			add(host, username, entry);
+		}
+
+		else if (command == "read") {
+			int dataId;
+			std::cin >> dataId;
+			read(host, username, dataId);
 		}
 
 		else if (command == "logout") {
