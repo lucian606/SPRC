@@ -10,7 +10,11 @@
 #define LENGTH 100
 #define USER_EXISTS -1
 #define NOT_LOGGED_IN -2
-#define ERROR 1
+#define ERROR -1
+#define OK 0
+
+#define ADDED 1
+#define UPDATED 2
 
 int login(char *host, char *name) {
 	CLIENT *clnt;
@@ -39,6 +43,30 @@ int login(char *host, char *name) {
 	clnt_destroy (clnt);
 #endif	 /* DEBUG */
 	return *result_1;
+}
+
+void readall(char *host, char *name) {
+	CLIENT *clnt;
+	char **result_1;
+
+#ifndef	DEBUG
+	clnt = clnt_create (host, RPC_DB, RPC_DB_VERS, "udp");
+	if (clnt == NULL) {
+		clnt_pcreateerror (host);
+		exit (1);
+	}
+#endif	/* DEBUG */
+
+	result_1 = readall_1(&name, clnt);
+	if (result_1 == (char **) NULL) {
+		clnt_perror (clnt, "call failed");
+	} else {
+		std::cout << *result_1;
+	}
+
+#ifndef	DEBUG
+	clnt_destroy (clnt);
+#endif	 /* DEBUG */
 }
 
 int logout(char *host, char *name) {
@@ -94,7 +122,7 @@ int add(char *host, char *username, struct SensorData entry) {
 		if (*result_1 == ERROR) {
 			std::cout << "Error while adding data" << std::endl;
 		} else {
-			std::cout << "Data entry added successfully" << std::endl;
+			std::cout << "Add was successful" << std::endl;
 		}
 	}
 
@@ -136,6 +164,69 @@ void read(char *host, char *username, int dataId) {
 	//return *result_1;
 }
 
+void getstat(char *host, char *username, int dataId) {
+	
+	CLIENT *clnt;
+	char **result_1;
+	struct SpecificId p = {dataId, username};
+	//for (int i = 0; i < entry.noValues; i++)
+	//	std::cout << p.data.value[i] << std::endl;
+
+#ifndef	DEBUG
+	clnt = clnt_create (host, RPC_DB, RPC_DB_VERS, "udp");
+	if (clnt == NULL) {
+		clnt_pcreateerror (host);
+		exit (1);
+	}
+#endif	/* DEBUG */
+
+	result_1 = getstat_1(&p, clnt);
+	if (result_1 == (char **) NULL) {
+		clnt_perror (clnt, "call failed");
+	} else if (strcmp(*result_1, "ERROR")) {
+		std::cout << "Stats read successfully" << std::endl;
+		std::cout << *result_1;
+	} else {
+		std::cout << "Invalid id, the entry doesn't exist\n";
+	}
+
+#ifndef	DEBUG
+	clnt_destroy (clnt);
+#endif	 /* DEBUG */
+	//return *result_1;
+}
+
+void del(char *host, char *username, int dataId) {
+	
+	CLIENT *clnt;
+	int *result_1;
+	struct SpecificId p = {dataId, username};
+	//for (int i = 0; i < entry.noValues; i++)
+	//	std::cout << p.data.value[i] << std::endl;
+
+#ifndef	DEBUG
+	clnt = clnt_create (host, RPC_DB, RPC_DB_VERS, "udp");
+	if (clnt == NULL) {
+		clnt_pcreateerror (host);
+		exit (1);
+	}
+#endif	/* DEBUG */
+
+	result_1 = delete_1(&p, clnt);
+	if (result_1 == (int *) NULL) {
+		clnt_perror (clnt, "call failed");
+	} else if (*result_1 == OK) {
+			std::cout << "Data deleted successfully" << std::endl;
+	} else {
+			std::cout << "Invalid id, the entry doesn't exist\n";
+	}
+
+#ifndef	DEBUG
+	clnt_destroy (clnt);
+#endif	 /* DEBUG */
+	//return *result_1;
+}
+
 int update(char *host, char *username, struct SensorData entry) {
 	CLIENT *clnt;
 	int *result_1;
@@ -158,7 +249,7 @@ int update(char *host, char *username, struct SensorData entry) {
 		if (*result_1 == ERROR) {
 			std::cout << "Error while updating data" << std::endl;
 		} else {
-			std::cout << "Data entry updated successfully" << std::endl;
+			std::cout << "Update was successful" << std::endl;
 		}
 	}
 
@@ -218,10 +309,42 @@ int main(int argc, char *argv[]) {
 		}
 
 		else if (command == "read") {
+			if (userKey < 0) {
+				std::cout << unauthorized_msg;
+				continue;
+			}
 			int dataId;
 			std::cin >> dataId;
 			read(host, username, dataId);
 		}
+
+		else if (command == "getstat") {
+			if (userKey < 0) {
+				std::cout << unauthorized_msg;
+				continue;
+			}
+			int dataId;
+			std::cin >> dataId;
+			getstat(host, username, dataId);
+		}
+
+		else if (command == "readall") {
+			if (userKey < 0) {
+				std::cout << unauthorized_msg;
+				continue;
+			}
+			readall(host, username);
+		}
+
+		else if (command == "del") {
+			if (userKey < 0) {
+				std::cout << unauthorized_msg;
+				continue;
+			}
+			int dataId;
+			std::cin >> dataId;
+			del(host, username, dataId);
+		}		
 
 		else if (command == "logout") {
 			r = logout(host, username);
@@ -229,6 +352,27 @@ int main(int argc, char *argv[]) {
 				std::cout << "Logging user out\n";
 				keepRunning = false;
 			}
+		}
+
+		else if (command == "update") {
+			if (userKey < 0) {
+				std::cout << unauthorized_msg;
+				continue;
+			}
+			int dataId;
+			int noValues;
+			float *values;
+			std::cin >> dataId;
+			std::cin >> noValues;
+			struct SensorData entry;
+			entry.dataId = dataId;
+			entry.noValues = noValues;
+			entry.value.value_len = noValues;
+			entry.value.value_val = new float[noValues + 1];
+			for (int i = 0; i < noValues; ++i) {
+				std::cin >> entry.value.value_val[i];
+			}
+			update(host, username, entry);			
 		}
 
 	}
