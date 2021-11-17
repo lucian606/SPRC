@@ -69,6 +69,30 @@ void readall(char *host, char *name) {
 #endif	 /* DEBUG */
 }
 
+void getstatall(char *host, char *name) {
+	CLIENT *clnt;
+	char **result_1;
+
+#ifndef	DEBUG
+	clnt = clnt_create (host, RPC_DB, RPC_DB_VERS, "udp");
+	if (clnt == NULL) {
+		clnt_pcreateerror (host);
+		exit (1);
+	}
+#endif	/* DEBUG */
+
+	result_1 = getstatall_1(&name, clnt);
+	if (result_1 == (char **) NULL) {
+		clnt_perror (clnt, "call failed");
+	} else {
+		std::cout << *result_1;
+	}
+
+#ifndef	DEBUG
+	clnt_destroy (clnt);
+#endif	 /* DEBUG */
+}
+
 int logout(char *host, char *name) {
 	CLIENT *clnt;
 	int *result_1;
@@ -334,6 +358,14 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 			readall(host, username);
+		}
+
+		else if (command == "getstatall") {
+			if (userKey < 0) {
+				std::cout << unauthorized_msg;
+				continue;
+			}
+			getstatall(host, username);
 		}
 
 		else if (command == "del") {

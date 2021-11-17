@@ -226,10 +226,29 @@ getstatall_1_svc(char **argp, struct svc_req *rqstp)
 {
 	static char * result;
 
+	std::cout << "User wants to get all of his stats: " << *argp << std::endl;
+	std::string resultStr = "Here are all of your stats:\n[";
+
+		
+	for(std::map<int, struct SensorData>::iterator iter = dataBase[*argp].begin(); iter != dataBase[*argp].end(); ++iter) {
+		int dataId = iter->first;
+		struct SensorData data = iter->second;
+		resultStr += "\n{\n";
+		resultStr += "  Data id: " + std::to_string(dataId) + '\n';
+		resultStr += "  Min value: " + std::to_string(getMin(data.value.value_val, data.noValues)) + '\n';
+		resultStr += "  Max value: " + std::to_string(getMax(data.value.value_val, data.noValues)) + '\n';
+		resultStr += "  Mean value: " + std::to_string(getMean(data.value.value_val, data.noValues)) + '\n';
+		resultStr += "  Median value: " + std::to_string(getMedian(data.value.value_val, data.noValues));		
+		resultStr += "\n}";
+	}
+
+	resultStr += "\n]\n";
+
 	/*
 	 * insert server code here
 	 */
-
+	result = (char *) calloc(resultStr.size() + 1, sizeof(char));	
+	strcpy(result, resultStr.c_str());
 	return &result;
 }
 
@@ -313,7 +332,7 @@ readall_1_svc(char **argp, struct svc_req *rqstp)
 		
 	for(std::map<int, struct SensorData>::iterator iter = dataBase[*argp].begin(); iter != dataBase[*argp].end(); ++iter) {
 		int dataId = iter->first;
-		resultStr += "\n{";
+		resultStr += "\n{\n";
 		resultStr += "  Data id: " + std::to_string(dataId) + '\n';
 		resultStr += "  Data size: " + std::to_string(iter->second.noValues) + '\n';
 		resultStr += "  Data: ";
