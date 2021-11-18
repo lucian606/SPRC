@@ -269,10 +269,27 @@ store_1_svc(char **argp, struct svc_req *rqstp)
 {
 	static char * result;
 
+	std::cout << "User wants to store his data: " << *argp << std::endl;
+	std::string resultStr = "[";
+
+	for(std::map<int, struct SensorData>::iterator iter = dataBase[*argp].begin(); iter != dataBase[*argp].end(); ++iter) {
+		int dataId = iter->first;
+		resultStr += "\n{\n";
+		resultStr += "  dataId: " + std::to_string(dataId) + '\n';
+		resultStr += "  dataSize: " + std::to_string(iter->second.noValues) + '\n';
+		resultStr += "  data: ";
+		for (int i = 0; i < iter->second.noValues; i++)
+			resultStr = resultStr + std::to_string(iter->second.value.value_val[i]) + " ";
+		resultStr += "\n}";
+	}
+
+	resultStr += "\n]\n";
+
 	/*
 	 * insert server code here
 	 */
-
+	result = (char *) calloc(resultStr.size() + 1, sizeof(char));	
+	strcpy(result, resultStr.c_str());
 	return &result;
 }
 

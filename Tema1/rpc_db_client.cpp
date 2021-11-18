@@ -71,6 +71,29 @@ char *readall(char *host, char *name) {
 	return *result_1;
 }
 
+char *store(char *host, char *name) {
+	CLIENT *clnt;
+	char **result_1;
+
+#ifndef	DEBUG
+	clnt = clnt_create (host, RPC_DB, RPC_DB_VERS, "udp");
+	if (clnt == NULL) {
+		clnt_pcreateerror (host);
+		exit (1);
+	}
+#endif	/* DEBUG */
+
+	result_1 = store_1(&name, clnt);
+	if (result_1 == (char **) NULL) {
+		clnt_perror (clnt, "call failed");
+	}
+
+#ifndef	DEBUG
+	clnt_destroy (clnt);
+#endif	 /* DEBUG */
+	return *result_1;
+}
+
 void getstatall(char *host, char *name) {
 	CLIENT *clnt;
 	char **result_1;
@@ -396,7 +419,7 @@ int main(int argc, char *argv[]) {
 			}
 			user_file = std::string(username) + ".rpcdb";
 			std::cout << "Storing the following data:\n";
-			std::string result = std::string(readall(host, username));
+			std::string result = std::string(store(host, username));
 			std::cout << result;
 			std::ofstream outfile;
 			outfile.open(user_file);
