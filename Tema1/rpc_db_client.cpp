@@ -94,6 +94,31 @@ char *store(char *host, char *name) {
 	return *result_1;
 }
 
+int *load(char *host, char *name) {
+	CLIENT *clnt;
+	int *result_1;
+	char pl[4] = "plm";
+	LoadData data = {name, pl};
+
+#ifndef	DEBUG
+	clnt = clnt_create (host, RPC_DB, RPC_DB_VERS, "udp");
+	if (clnt == NULL) {
+		clnt_pcreateerror (host);
+		exit (1);
+	}
+#endif	/* DEBUG */
+
+	result_1 = load_1(&data, clnt);
+	if (result_1 == (int *) NULL) {
+		clnt_perror (clnt, "call failed");
+	}
+
+#ifndef	DEBUG
+	clnt_destroy (clnt);
+#endif	 /* DEBUG */
+	return result_1;
+}
+
 void getstatall(char *host, char *name) {
 	CLIENT *clnt;
 	char **result_1;
@@ -425,6 +450,14 @@ int main(int argc, char *argv[]) {
 			outfile.open(user_file);
 			outfile << result;
 			outfile.close();
+		}
+
+		else if (command == "load") {
+			if (userKey < 0) {
+				std::cout << unauthorized_msg;
+				continue;
+			}
+			load(host, username);
 		}
 
 		else if (command == "update") {

@@ -43,3 +43,15 @@ xdr_SpecificId (XDR *xdrs, SpecificId *objp)
 		 return FALSE;
 	return TRUE;
 }
+
+bool_t
+xdr_LoadData (XDR *xdrs, LoadData *objp)
+{
+	register int32_t *buf;
+
+	 if (!xdr_string (xdrs, &objp->name, ~0))
+		 return FALSE;
+	 if (!xdr_string (xdrs, &objp->dataJson, ~0))
+		 return FALSE;
+	return TRUE;
+}

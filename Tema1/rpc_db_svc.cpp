@@ -26,7 +26,7 @@ rpc_db_1(struct svc_req *rqstp, register SVCXPRT *transp)
 		struct SpecificId read_1_arg;
 		struct SpecificId getstat_1_arg;
 		char *getstatall_1_arg;
-		char *load_1_arg;
+		LoadData load_1_arg;
 		char *store_1_arg;
 		char *login_1_arg;
 		char *logout_1_arg;
@@ -78,7 +78,7 @@ rpc_db_1(struct svc_req *rqstp, register SVCXPRT *transp)
 		break;
 
 	case LOAD:
-		_xdr_argument = (xdrproc_t) xdr_wrapstring;
+		_xdr_argument = (xdrproc_t) xdr_LoadData;
 		_xdr_result = (xdrproc_t) xdr_int;
 		local = (char *(*)(char *, struct svc_req *)) load_1_svc;
 		break;

@@ -253,13 +253,16 @@ getstatall_1_svc(char **argp, struct svc_req *rqstp)
 }
 
 int *
-load_1_svc(char **argp, struct svc_req *rqstp)
+load_1_svc(LoadData *argp, struct svc_req *rqstp)
 {
 	static int  result;
 
 	/*
 	 * insert server code here
 	 */
+
+	std::cout << "User wants to load DB from file: " << argp->name << std::endl;
+	dataBase[argp->name].clear();
 
 	return &result;
 }

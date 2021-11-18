@@ -20,6 +20,12 @@ struct SpecificId
     string name<>;
 };
 
+struct LoadData
+{
+    string name<>;
+    string dataJson<>;
+};
+
 program RPC_DB
 {
     version RPC_DB_VERS
@@ -30,7 +36,7 @@ program RPC_DB
         string READ(struct SpecificId) = 4;
         string GETSTAT(struct SpecificId) = 5;
         string GETSTATALL(string) = 6;
-        int LOAD(string) = 7;
+        int LOAD(LoadData) = 7;
         string STORE(string) = 8;
         int LOGIN(string) = 9;
         int LOGOUT(string) = 10;

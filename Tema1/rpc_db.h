@@ -36,6 +36,12 @@ struct SpecificId {
 };
 typedef struct SpecificId SpecificId;
 
+struct LoadData {
+	char *name;
+	char *dataJson;
+};
+typedef struct LoadData LoadData;
+
 #define RPC_DB 1
 #define RPC_DB_VERS 1
 
@@ -59,8 +65,8 @@ extern  char ** getstat_1_svc(struct SpecificId *, struct svc_req *);
 extern  char ** getstatall_1(char **, CLIENT *);
 extern  char ** getstatall_1_svc(char **, struct svc_req *);
 #define LOAD 7
-extern  int * load_1(char **, CLIENT *);
-extern  int * load_1_svc(char **, struct svc_req *);
+extern  int * load_1(LoadData *, CLIENT *);
+extern  int * load_1_svc(LoadData *, struct svc_req *);
 #define STORE 8
 extern  char ** store_1(char **, CLIENT *);
 extern  char ** store_1_svc(char **, struct svc_req *);
@@ -118,11 +124,13 @@ extern int rpc_db_1_freeresult ();
 extern  bool_t xdr_SensorData (XDR *, SensorData*);
 extern  bool_t xdr_UserPackage (XDR *, UserPackage*);
 extern  bool_t xdr_SpecificId (XDR *, SpecificId*);
+extern  bool_t xdr_LoadData (XDR *, LoadData*);
 
 #else /* K&R C */
 extern bool_t xdr_SensorData ();
 extern bool_t xdr_UserPackage ();
 extern bool_t xdr_SpecificId ();
+extern bool_t xdr_LoadData ();
 
 #endif /* K&R C */
 
