@@ -278,12 +278,15 @@ store_1_svc(char **argp, struct svc_req *rqstp)
 	for(std::map<int, struct SensorData>::iterator iter = dataBase[*argp].begin(); iter != dataBase[*argp].end(); ++iter) {
 		int dataId = iter->first;
 		resultStr += "\n{\n";
-		resultStr += "  dataId: " + std::to_string(dataId) + '\n';
-		resultStr += "  dataSize: " + std::to_string(iter->second.noValues) + '\n';
-		resultStr += "  data: ";
-		for (int i = 0; i < iter->second.noValues; i++)
-			resultStr = resultStr + std::to_string(iter->second.value.value_val[i]) + " ";
-		resultStr += "\n}";
+		resultStr += "  \"dataId\" : " + std::to_string(dataId) + '\n';
+		resultStr += "  \"dataSize\" : " + std::to_string(iter->second.noValues) + '\n';
+		resultStr += "  \"data\" : {";
+		for (int i = 0; i < iter->second.noValues; i++) {
+			resultStr = resultStr + std::to_string(iter->second.value.value_val[i]);
+			if (i < iter->second.noValues - 1)
+				resultStr += ", ";
+		}
+		resultStr += "}\n}";
 	}
 
 	resultStr += "\n]\n";
