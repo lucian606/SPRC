@@ -6,6 +6,7 @@
 
 #include "rpc_db.h"
 #include <iostream>
+#include <fstream>
 
 #define LENGTH 100
 #define USER_EXISTS -1
@@ -45,7 +46,7 @@ int login(char *host, char *name) {
 	return *result_1;
 }
 
-void readall(char *host, char *name) {
+char *readall(char *host, char *name) {
 	CLIENT *clnt;
 	char **result_1;
 
@@ -67,6 +68,7 @@ void readall(char *host, char *name) {
 #ifndef	DEBUG
 	clnt_destroy (clnt);
 #endif	 /* DEBUG */
+	return *result_1;
 }
 
 void getstatall(char *host, char *name) {
@@ -298,6 +300,7 @@ int main(int argc, char *argv[]) {
 	int r;
 	char username[LENGTH];
 	std::string unauthorized_msg = "You need to be logged in to use this command.\n";
+	std::string user_file;
 
 	while (keepRunning) {
 		std::cin >> command;
@@ -384,6 +387,21 @@ int main(int argc, char *argv[]) {
 				std::cout << "Logging user out\n";
 				keepRunning = false;
 			}
+		}
+
+		else if (command == "store") {
+			if (userKey < 0) {
+				std::cout << unauthorized_msg;
+				continue;
+			}
+			user_file = std::string(username) + ".rpcdb";
+			std::cout << "Storing the following data:\n";
+			std::string result = std::string(readall(host, username));
+			std::cout << result;
+			std::ofstream outfile;
+			outfile.open(user_file);
+			outfile << result;
+			outfile.close();
 		}
 
 		else if (command == "update") {
