@@ -94,11 +94,10 @@ char *store(char *host, char *name) {
 	return *result_1;
 }
 
-int *load(char *host, char *name) {
+int *load(char *host, char *name, char *jsonData) {
 	CLIENT *clnt;
 	int *result_1;
-	char pl[4] = "plm";
-	LoadData data = {name, pl};
+	LoadData data = {name, jsonData};
 
 #ifndef	DEBUG
 	clnt = clnt_create (host, RPC_DB, RPC_DB_VERS, "udp");
@@ -357,6 +356,7 @@ int main(int argc, char *argv[]) {
 			if (userKey < 0) {
 				std::cin >> username;
 				userKey = login(host, username);
+				user_file = std::string(username) + ".rpcdb";
 			} else {
 				std::cout << "You are already logged in as: " << username << std::endl;
 			}
@@ -442,7 +442,6 @@ int main(int argc, char *argv[]) {
 				std::cout << unauthorized_msg;
 				continue;
 			}
-			user_file = std::string(username) + ".rpcdb";
 			std::cout << "Storing the following data:\n";
 			std::string result = std::string(store(host, username));
 			std::cout << result;
@@ -457,7 +456,19 @@ int main(int argc, char *argv[]) {
 				std::cout << unauthorized_msg;
 				continue;
 			}
-			load(host, username);
+			std::cout << "Loading data from file\n";
+			std::string result = "";
+			std::string line;
+			std::ifstream infile;
+			infile.open(user_file);
+			while(std::getline(infile, line)) {
+				result += line;
+			}
+			std::cout << result << std::endl;
+			infile.close();
+			char *result_c = new char[result.length() + 1];
+			strcpy(result_c, result.c_str());
+			load(host, username, result_c);
 		}
 
 		else if (command == "update") {

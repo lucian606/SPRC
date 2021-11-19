@@ -5,6 +5,7 @@
  */
 
 #include "rpc_db.h"
+#include "nlohmann/json.hpp"
 #include <string>
 #include <map>
 #include <iostream>
@@ -262,6 +263,7 @@ load_1_svc(LoadData *argp, struct svc_req *rqstp)
 	 */
 
 	std::cout << "User wants to load DB from file: " << argp->name << std::endl;
+	std::cout << argp->dataJson << std::endl;
 	dataBase[argp->name].clear();
 
 	return &result;
