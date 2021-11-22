@@ -348,13 +348,15 @@ int main(int argc, char *argv[]) {
 	char username[LENGTH];
 	std::string unauthorized_msg = "You need to be logged in to use this command.\n";
 	std::string user_file;
+	std::ifstream input;
+	input.open(argv[2]);
 
 	while (keepRunning) {
-		std::cin >> command;
+		input >> command;
 
 		if (command == "login") {
 			if (userKey < 0) {
-				std::cin >> username;
+				input >> username;
 				userKey = login(host, username);
 				user_file = std::string(username) + ".rpcdb";
 			} else {
@@ -370,15 +372,15 @@ int main(int argc, char *argv[]) {
 			int dataId;
 			int noValues;
 			float *values;
-			std::cin >> dataId;
-			std::cin >> noValues;
+			input >> dataId;
+			input >> noValues;
 			struct SensorData entry;
 			entry.dataId = dataId;
 			entry.noValues = noValues;
 			entry.value.value_len = noValues;
 			entry.value.value_val = new float[noValues + 1];
 			for (int i = 0; i < noValues; ++i) {
-				std::cin >> entry.value.value_val[i];
+				input >> entry.value.value_val[i];
 			}
 			add(host, username, entry);
 		}
@@ -389,7 +391,7 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 			int dataId;
-			std::cin >> dataId;
+			input >> dataId;
 			read(host, username, dataId);
 		}
 
@@ -399,7 +401,7 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 			int dataId;
-			std::cin >> dataId;
+			input >> dataId;
 			getstat(host, username, dataId);
 		}
 
@@ -425,7 +427,7 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 			int dataId;
-			std::cin >> dataId;
+			input >> dataId;
 			del(host, username, dataId);
 		}		
 
@@ -463,8 +465,9 @@ int main(int argc, char *argv[]) {
 			infile.open(user_file);
 			while(std::getline(infile, line)) {
 				result += line;
+				result += "\n";
 			}
-			std::cout << result << std::endl;
+			std::cout << result;
 			infile.close();
 			char *result_c = new char[result.length() + 1];
 			strcpy(result_c, result.c_str());
@@ -479,20 +482,22 @@ int main(int argc, char *argv[]) {
 			int dataId;
 			int noValues;
 			float *values;
-			std::cin >> dataId;
-			std::cin >> noValues;
+			input >> dataId;
+			input >> noValues;
 			struct SensorData entry;
 			entry.dataId = dataId;
 			entry.noValues = noValues;
 			entry.value.value_len = noValues;
 			entry.value.value_val = new float[noValues + 1];
 			for (int i = 0; i < noValues; ++i) {
-				std::cin >> entry.value.value_val[i];
+				input >> entry.value.value_val[i];
 			}
 			update(host, username, entry);			
 		}
 
 	}
+
+	input.close();
 
 	exit (0);
 }

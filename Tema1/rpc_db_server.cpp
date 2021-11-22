@@ -8,6 +8,7 @@
 #include "nlohmann/json.hpp"
 #include <string>
 #include <map>
+#include <sstream>
 #include <iostream>
 #include <queue>
 
@@ -263,8 +264,29 @@ load_1_svc(LoadData *argp, struct svc_req *rqstp)
 	 */
 
 	std::cout << "User wants to load DB from file: " << argp->name << std::endl;
-	std::cout << argp->dataJson << std::endl;
-	dataBase[argp->name].clear();
+	std::stringstream ss(argp->dataJson);
+	int dataId;
+	dataBase[argp->name].clear();	
+	while (ss >> dataId) {
+		struct SensorData data;
+		data.dataId = dataId;
+		std::cout << "  Data id: " << dataId << std::endl;
+		int noValues;
+		ss >> noValues;
+		data.noValues = noValues;
+		data.value.value_val = (float *) calloc(noValues, sizeof(float));
+		data.value.value_len = noValues;
+		std::cout << "  Data size: " << noValues << std::endl;
+		std::cout << "  Data: ";
+		for (int i = 0; i < noValues; i++) {
+			float value;
+			ss >> value;
+			data.value.value_val[i] = value;
+			std::cout << value << " ";
+		}
+		std::cout << std::endl;
+		dataBase[argp->name][dataId] = data;
+	}
 
 	return &result;
 }
@@ -275,23 +297,20 @@ store_1_svc(char **argp, struct svc_req *rqstp)
 	static char * result;
 
 	std::cout << "User wants to store his data: " << *argp << std::endl;
-	std::string resultStr = "[";
+	std::string resultStr = "";
 
 	for(std::map<int, struct SensorData>::iterator iter = dataBase[*argp].begin(); iter != dataBase[*argp].end(); ++iter) {
 		int dataId = iter->first;
-		resultStr += "\n{\n";
-		resultStr += "  \"dataId\" : " + std::to_string(dataId) + '\n';
-		resultStr += "  \"dataSize\" : " + std::to_string(iter->second.noValues) + '\n';
-		resultStr += "  \"data\" : {";
+		resultStr += std::to_string(dataId) + ' ';
+		resultStr += std::to_string(iter->second.noValues) + ' ';
 		for (int i = 0; i < iter->second.noValues; i++) {
 			resultStr = resultStr + std::to_string(iter->second.value.value_val[i]);
 			if (i < iter->second.noValues - 1)
-				resultStr += ", ";
+				resultStr += " ";
 		}
-		resultStr += "}\n}";
+		resultStr += "\n";
 	}
 
-	resultStr += "\n]\n";
 
 	/*
 	 * insert server code here

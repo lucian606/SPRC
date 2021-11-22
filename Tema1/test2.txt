@@ -1,0 +1,8 @@
+login Ion
+add 0 1 0
+add 1 1 1
+add 2 2 3 4
+readall
+update 2 1 0
+read 2 
+logout
