@@ -122,7 +122,7 @@ delete_1_svc(struct SpecificId *argp, struct svc_req *rqstp)
 int *
 update_1_svc(struct UserPackage *argp, struct svc_req *rqstp)
 {
-	static int result = ADDED;
+	static int result = UPDATED;
 
 	struct SensorData data = argp->data;
 	struct SensorData newData;
@@ -138,12 +138,20 @@ update_1_svc(struct UserPackage *argp, struct svc_req *rqstp)
 		newData.value.value_val[i] = data.value.value_val[i];
 	}
 
-	if (dataBase[argp->name].find(data.dataId) != dataBase[argp->name].end())
-		result = UPDATED;
-
-	dataBase[argp->name][data.dataId] = newData;
+	result = UPDATED;
 
 	std::cout << std::endl;
+
+	if (dataBase.find(argp->name) == dataBase.end() || 
+			dataBase[argp->name].find(argp->data.dataId) == dataBase[argp->name].end()) {
+//			std::cout << dataBase[argp->name][argp->data.dataId].value.value_val[0] << std::endl;
+		result = ADDED;
+		std::cout << "Update call adds new data: " << argp->data.dataId << std::endl;
+	} else {
+		std::cout << "Update call updates existing data" << std::endl;
+	}
+
+	dataBase[argp->name][argp->data.dataId] = newData;
 
 	return &result;
 }

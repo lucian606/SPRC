@@ -319,10 +319,10 @@ int update(char *host, char *username, struct SensorData entry) {
 	if (result_1 == (int *) NULL) {
 		clnt_perror (clnt, "call failed");
 	} else {
-		if (*result_1 == ERROR) {
-			std::cout << "Error while updating data" << std::endl;
+		if (*result_1 == UPDATED) {
+			std::cout << "The entry was updated" << std::endl;
 		} else {
-			std::cout << "Update was successful" << std::endl;
+			std::cout << "A new entry was added" << std::endl;
 		}
 	}
 
