@@ -17,6 +17,7 @@
 #define ADDED 1
 #define UPDATED 2
 
+// Logeaza userul folosind un nume
 int login(char *host, char *name) {
 	CLIENT *clnt;
 	int *result_1;
@@ -27,7 +28,7 @@ int login(char *host, char *name) {
 		clnt_pcreateerror (host);
 		exit (1);
 	}
-#endif	/* DEBUG */
+#endif
 
 	result_1 = login_1(&name, clnt);
 	if (result_1 == (int *) NULL) {
@@ -42,10 +43,11 @@ int login(char *host, char *name) {
 
 #ifndef	DEBUG
 	clnt_destroy (clnt);
-#endif	 /* DEBUG */
+#endif
 	return *result_1;
 }
 
+// Citestea tot DB-ul userului cu numele name
 char *readall(char *host, char *name) {
 	CLIENT *clnt;
 	char **result_1;
@@ -56,7 +58,7 @@ char *readall(char *host, char *name) {
 		clnt_pcreateerror (host);
 		exit (1);
 	}
-#endif	/* DEBUG */
+#endif
 
 	result_1 = readall_1(&name, clnt);
 	if (result_1 == (char **) NULL) {
@@ -67,10 +69,11 @@ char *readall(char *host, char *name) {
 
 #ifndef	DEBUG
 	clnt_destroy (clnt);
-#endif	 /* DEBUG */
+#endif
 	return *result_1;
 }
 
+// Obtine tot DB-ul de la server si il stocheaza
 char *store(char *host, char *name) {
 	CLIENT *clnt;
 	char **result_1;
@@ -81,7 +84,7 @@ char *store(char *host, char *name) {
 		clnt_pcreateerror (host);
 		exit (1);
 	}
-#endif	/* DEBUG */
+#endif
 
 	result_1 = store_1(&name, clnt);
 	if (result_1 == (char **) NULL) {
@@ -90,10 +93,11 @@ char *store(char *host, char *name) {
 
 #ifndef	DEBUG
 	clnt_destroy (clnt);
-#endif	 /* DEBUG */
+#endif
 	return *result_1;
 }
 
+// Incarca continutul fisierului userului in DB-ul din server
 int *load(char *host, char *name, char *jsonData) {
 	CLIENT *clnt;
 	int *result_1;
@@ -105,19 +109,25 @@ int *load(char *host, char *name, char *jsonData) {
 		clnt_pcreateerror (host);
 		exit (1);
 	}
-#endif	/* DEBUG */
+#endif
 
 	result_1 = load_1(&data, clnt);
 	if (result_1 == (int *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
+	if (*result_1 == ERROR) {
+		std::cout << "Error while loading data, you altered the server DB" << std::endl;
+	} else {
+		std::cout << "Data loaded" << std::endl;
+	}
 
 #ifndef	DEBUG
 	clnt_destroy (clnt);
-#endif	 /* DEBUG */
+#endif
 	return result_1;
 }
 
+// Obtine toate statisticile userului
 void getstatall(char *host, char *name) {
 	CLIENT *clnt;
 	char **result_1;
@@ -128,7 +138,7 @@ void getstatall(char *host, char *name) {
 		clnt_pcreateerror (host);
 		exit (1);
 	}
-#endif	/* DEBUG */
+#endif
 
 	result_1 = getstatall_1(&name, clnt);
 	if (result_1 == (char **) NULL) {
@@ -139,9 +149,10 @@ void getstatall(char *host, char *name) {
 
 #ifndef	DEBUG
 	clnt_destroy (clnt);
-#endif	 /* DEBUG */
+#endif
 }
 
+// Delogheaza userul cu numele name
 int logout(char *host, char *name) {
 	CLIENT *clnt;
 	int *result_1;
@@ -152,7 +163,7 @@ int logout(char *host, char *name) {
 		clnt_pcreateerror (host);
 		exit (1);
 	}
-#endif	/* DEBUG */
+#endif
 
 	result_1 = logout_1(&name, clnt);
 	if (result_1 == (int *) NULL) {
@@ -167,18 +178,17 @@ int logout(char *host, char *name) {
 
 #ifndef	DEBUG
 	clnt_destroy (clnt);
-#endif	 /* DEBUG */
+#endif
 	return *result_1;
 
 }
 
+// Adauga in DB-ul userului entry-ul dat
 int add(char *host, char *username, struct SensorData entry) {
 	
 	CLIENT *clnt;
 	int *result_1;
 	struct UserPackage p = {entry, username};
-	//for (int i = 0; i < entry.noValues; i++)
-	//	std::cout << p.data.value[i] << std::endl;
 
 #ifndef	DEBUG
 	clnt = clnt_create (host, RPC_DB, RPC_DB_VERS, "udp");
@@ -186,14 +196,14 @@ int add(char *host, char *username, struct SensorData entry) {
 		clnt_pcreateerror (host);
 		exit (1);
 	}
-#endif	/* DEBUG */
+#endif
 
 	result_1 = add_1(&p, clnt);
 	if (result_1 == (int *) NULL) {
 		clnt_perror (clnt, "call failed");
 	} else {
 		if (*result_1 == ERROR) {
-			std::cout << "Error while adding data" << std::endl;
+			std::cout << "Error while adding data, id already exists" << std::endl;
 		} else {
 			std::cout << "Add was successful" << std::endl;
 		}
@@ -201,17 +211,16 @@ int add(char *host, char *username, struct SensorData entry) {
 
 #ifndef	DEBUG
 	clnt_destroy (clnt);
-#endif	 /* DEBUG */
+#endif
 	return *result_1;
 }
 
+// Citeste entry-ul cu id-ul id din DB-ul userului cu numele username
 void read(char *host, char *username, int dataId) {
 	
 	CLIENT *clnt;
 	char **result_1;
 	struct SpecificId p = {dataId, username};
-	//for (int i = 0; i < entry.noValues; i++)
-	//	std::cout << p.data.value[i] << std::endl;
 
 #ifndef	DEBUG
 	clnt = clnt_create (host, RPC_DB, RPC_DB_VERS, "udp");
@@ -219,7 +228,7 @@ void read(char *host, char *username, int dataId) {
 		clnt_pcreateerror (host);
 		exit (1);
 	}
-#endif	/* DEBUG */
+#endif
 
 	result_1 = read_1(&p, clnt);
 	if (result_1 == (char **) NULL) {
@@ -233,17 +242,15 @@ void read(char *host, char *username, int dataId) {
 
 #ifndef	DEBUG
 	clnt_destroy (clnt);
-#endif	 /* DEBUG */
-	//return *result_1;
+#endif
 }
 
+// Obtine statisticile entry-ului id din DB-ul userului cu numele username
 void getstat(char *host, char *username, int dataId) {
 	
 	CLIENT *clnt;
 	char **result_1;
 	struct SpecificId p = {dataId, username};
-	//for (int i = 0; i < entry.noValues; i++)
-	//	std::cout << p.data.value[i] << std::endl;
 
 #ifndef	DEBUG
 	clnt = clnt_create (host, RPC_DB, RPC_DB_VERS, "udp");
@@ -251,7 +258,7 @@ void getstat(char *host, char *username, int dataId) {
 		clnt_pcreateerror (host);
 		exit (1);
 	}
-#endif	/* DEBUG */
+#endif
 
 	result_1 = getstat_1(&p, clnt);
 	if (result_1 == (char **) NULL) {
@@ -265,17 +272,15 @@ void getstat(char *host, char *username, int dataId) {
 
 #ifndef	DEBUG
 	clnt_destroy (clnt);
-#endif	 /* DEBUG */
-	//return *result_1;
+#endif
 }
 
+// Sterge entry-ul cu id-ul id din DB-ul userului cu numele username
 void del(char *host, char *username, int dataId) {
 	
 	CLIENT *clnt;
 	int *result_1;
 	struct SpecificId p = {dataId, username};
-	//for (int i = 0; i < entry.noValues; i++)
-	//	std::cout << p.data.value[i] << std::endl;
 
 #ifndef	DEBUG
 	clnt = clnt_create (host, RPC_DB, RPC_DB_VERS, "udp");
@@ -283,7 +288,7 @@ void del(char *host, char *username, int dataId) {
 		clnt_pcreateerror (host);
 		exit (1);
 	}
-#endif	/* DEBUG */
+#endif
 
 	result_1 = delete_1(&p, clnt);
 	if (result_1 == (int *) NULL) {
@@ -296,16 +301,14 @@ void del(char *host, char *username, int dataId) {
 
 #ifndef	DEBUG
 	clnt_destroy (clnt);
-#endif	 /* DEBUG */
-	//return *result_1;
+#endif
 }
 
+// Updateaza entry-ul cu id-ul dat cu un nou entry
 int update(char *host, char *username, struct SensorData entry) {
 	CLIENT *clnt;
 	int *result_1;
 	struct UserPackage p = {entry, username};
-	//for (int i = 0; i < entry.noValues; i++)
-	//	std::cout << p.data.value[i] << std::endl;
 
 #ifndef	DEBUG
 	clnt = clnt_create (host, RPC_DB, RPC_DB_VERS, "udp");
@@ -313,7 +316,7 @@ int update(char *host, char *username, struct SensorData entry) {
 		clnt_pcreateerror (host);
 		exit (1);
 	}
-#endif	/* DEBUG */
+#endif
 
 	result_1 = update_1(&p, clnt);
 	if (result_1 == (int *) NULL) {
@@ -328,7 +331,7 @@ int update(char *host, char *username, struct SensorData entry) {
 
 #ifndef	DEBUG
 	clnt_destroy (clnt);
-#endif	 /* DEBUG */
+#endif
 	return *result_1;
 }
 

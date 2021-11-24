@@ -19,11 +19,16 @@
 #define ADDED 1
 #define UPDATED 2
 
+// Cheia de autentificare a ultimului utilizator
 int currentId = 0;
 
+// Hashmap pentru a retine ce utilizatori sunt logati
 std::map<std::string, int> loggedUsers;
+
+// Hasmap pentru a retine DB pentru fiecare user
 std::map<std::string, std::map<int, struct SensorData>> dataBase;
 
+// Extrage valoarea minima din array
 float getMin(float *v, int len) {
 	float min = v[0];
 	for (int i = 1; i < len; i++)
@@ -31,6 +36,8 @@ float getMin(float *v, int len) {
 	return min;
 }
 
+
+// Extrage valoarea maxima din array
 float getMax(float *v, int len) {
 	float max = v[0];
 	for (int i = 1; i < len; i++)
@@ -38,6 +45,7 @@ float getMax(float *v, int len) {
 	return max;
 }
 
+// Obtine media aritmetica a unui array
 float getMean(float *v, int len) {
 	float sum = 0;
 	for (int i = 0; i < len; i++)
@@ -45,37 +53,34 @@ float getMean(float *v, int len) {
 	return sum / len;
 }
 
+// Obtine mediana a unui array
 float getMedian(float *v, int len) {
 	std::priority_queue<float, std::vector<float>, std::greater<float>> pq;
-
 	float *aux = new float[len + 1];
-
 	for (int i = 0; i < len; i++)
 		pq.push(v[i]);
-
 	for (int i = 0; i < len; i++) {
 		aux[i] = pq.top();
 		pq.pop();
 	}
-
 	if (len % 2 != 0) 
 		return aux[len / 2];
-
 	return (aux[(len - 1) / 2] + aux [len / 2]) / 2;
 }
 
+
+// Functia apelata de user pentru a adauga date
 int *
 add_1_svc(struct UserPackage *argp, struct svc_req *rqstp)
 {
 	static int result = ADDED;
+	result = ADDED;
 
-	/*
-	 * insert server code here
-	 */
+	// Extrag datele
 	struct SensorData data = argp->data;
 	struct SensorData newData;
-	std::cout << "Received data from user: " << argp->name << std::endl;
-	std::cout << "Here are the received values: ";
+	std::cout << "User wants to add data entry: " << argp->name << std::endl;
+	std::cout << "  Here are the received values for add: ";
 	newData.dataId = data.dataId;
 	newData.noValues = data.noValues;
 	newData.value.value_len = data.noValues;
@@ -86,48 +91,61 @@ add_1_svc(struct UserPackage *argp, struct svc_req *rqstp)
 		newData.value.value_val[i] = data.value.value_val[i];
 	}
 
-	if (dataBase[argp->name].find(data.dataId) != dataBase[argp->name].end())
-		result = UPDATED;
+	std::cout << std::endl;
 
+	// Verific daca ID-ul este deja in DB
+	if (dataBase[argp->name].find(data.dataId) != dataBase[argp->name].end()) {
+		result = ERROR;
+		std::cout << "  The user tried to add already existing id\n";
+
+		return &result;
+	}
+
+	std::cout << " User add success\n";
+	
+	// Adaug datele in DB daca acestea nu exista
 	dataBase[argp->name][data.dataId] = newData;
 
-	std::cout << std::endl;
 	return &result;
 }
 
+// Functia apelata de user pentru a sterge date
 int *
 delete_1_svc(struct SpecificId *argp, struct svc_req *rqstp)
 {
 	static int result = OK;
-
-	/*
-	 * insert server code here
-	 */
+	result = OK;
 
 	std::cout << "User wants to delete data: " << argp->name << std::endl;
 
+	// Verific daca exista datele cu ID-ul specificat
 	if (dataBase.find(argp->name) == dataBase.end() || 
 			dataBase[argp->name].find(argp->dataId) == dataBase[argp->name].end()) {		
-		std::cout << "User wants to delete unexisting data: " << argp->name << std::endl;
+		std::cout << " User wants to delete unexisting data: " << argp->name << std::endl;
 		result = ERROR;
 		return &result;
 	}
 
+	// Daca exista, atunci sterg datele din DB
 	dataBase[argp->name].erase(argp->dataId);
 	std::cout << " User deleted the data: " << argp->dataId << std::endl;
 	result = OK;
 	return &result;
 }
 
+
+// Functia apelata de user pentru a actualiza date
 int *
 update_1_svc(struct UserPackage *argp, struct svc_req *rqstp)
 {
 	static int result = UPDATED;
+	result = UPDATED;	
 
+	// Extrag datele
 	struct SensorData data = argp->data;
 	struct SensorData newData;
-	std::cout << "Received data from user: " << argp->name << std::endl;
-	std::cout << "Here are the received values: ";
+	std::cout << "User wants to update data: " << argp->name << std::endl;
+	std::cout << "  Here are the updated values: ";
 	newData.dataId = data.dataId;
 	newData.noValues = data.noValues;
 	newData.value.value_len = data.noValues;
@@ -138,17 +156,15 @@ update_1_svc(struct UserPackage *argp, struct svc_req *rqstp)
 		newData.value.value_val[i] = data.value.value_val[i];
 	}
 
-	result = UPDATED;
-
 	std::cout << std::endl;
 
+	// Verific daca exista datele cu ID-ul specificat
 	if (dataBase.find(argp->name) == dataBase.end() || 
 			dataBase[argp->name].find(argp->data.dataId) == dataBase[argp->name].end()) {
-//			std::cout << dataBase[argp->name][argp->data.dataId].value.value_val[0] << std::endl;
 		result = ADDED;
-		std::cout << "Update call adds new data: " << argp->data.dataId << std::endl;
+		std::cout << "  Update call adds new data entry: " << argp->data.dataId << std::endl;
 	} else {
-		std::cout << "Update call updates existing data" << std::endl;
+		std::cout << "  Update call updates existing data entry" << std::endl;
 	}
 
 	dataBase[argp->name][argp->data.dataId] = newData;
@@ -156,15 +172,13 @@ update_1_svc(struct UserPackage *argp, struct svc_req *rqstp)
 	return &result;
 }
 
+// Functia apelata de user pentru a citi un ID
 char **
 read_1_svc(struct SpecificId *argp, struct svc_req *rqstp)
 {
 	static char *result;
 
-	/*
-	 * insert server code here
-	 */
-
+	// Verific daca exista datele cu ID-ul specificat
 	if (dataBase.find(argp->name) == dataBase.end() || 
 			dataBase[argp->name].find(argp->dataId) == dataBase[argp->name].end()) {
 		result = (char *) calloc(7, sizeof(char));			
@@ -173,6 +187,7 @@ read_1_svc(struct SpecificId *argp, struct svc_req *rqstp)
 		return &result;
 	}
 	
+	// Extrag rezultatul
 	int noValues = dataBase[argp->name][argp->dataId].noValues;
 	float *values = dataBase[argp->name][argp->dataId].value.value_val;
 	std::string resultStr;
@@ -193,16 +208,14 @@ read_1_svc(struct SpecificId *argp, struct svc_req *rqstp)
 	return &result;
 }
 
+
+// Functia apelata de user pentru a obtine statisticile unui entry
 char **
 getstat_1_svc(struct SpecificId *argp, struct svc_req *rqstp)
 {
 	static char * result;
 
-	/*
-	 * insert server code here
-	 */
-
-
+	// Verific daca exista datele cu ID-ul specificat
 	if (dataBase.find(argp->name) == dataBase.end() || 
 			dataBase[argp->name].find(argp->dataId) == dataBase[argp->name].end()) {
 		result = (char *) calloc(7, sizeof(char));			
@@ -216,6 +229,7 @@ getstat_1_svc(struct SpecificId *argp, struct svc_req *rqstp)
 	std::cout << "User wants to get stats: " << argp->name << std::endl;
 	std::cout << "  Of the entry with id: " << argp->dataId << std::endl;
 	
+	// Calculez statisticile
 	float min = getMin(dataBase[argp->name][argp->dataId].value.value_val, size);
 	float max = getMax(dataBase[argp->name][argp->dataId].value.value_val, size);
 	float mean = getMean(dataBase[argp->name][argp->dataId].value.value_val, size);
@@ -231,6 +245,8 @@ getstat_1_svc(struct SpecificId *argp, struct svc_req *rqstp)
 	return &result;
 }
 
+
+// Functia apelata de user pentru a obtine toate statisticile din DB
 char **
 getstatall_1_svc(char **argp, struct svc_req *rqstp)
 {
@@ -239,7 +255,7 @@ getstatall_1_svc(char **argp, struct svc_req *rqstp)
 	std::cout << "User wants to get all of his stats: " << *argp << std::endl;
 	std::string resultStr = "Here are all of your stats:\n[";
 
-		
+	// Iterez prin DB si iau statisticile pentru fiecare entry
 	for(std::map<int, struct SensorData>::iterator iter = dataBase[*argp].begin(); iter != dataBase[*argp].end(); ++iter) {
 		int dataId = iter->first;
 		struct SensorData data = iter->second;
@@ -254,27 +270,32 @@ getstatall_1_svc(char **argp, struct svc_req *rqstp)
 
 	resultStr += "\n]\n";
 
-	/*
-	 * insert server code here
-	 */
+	// Trimist rezultatul
 	result = (char *) calloc(resultStr.size() + 1, sizeof(char));	
 	strcpy(result, resultStr.c_str());
 	return &result;
 }
 
+// Functie apelata de user pentru a incarca baza de date din fisier
 int *
 load_1_svc(LoadData *argp, struct svc_req *rqstp)
 {
-	static int  result;
+	static int result = OK;
+	result = OK;
 
-	/*
-	 * insert server code here
-	 */
+	if (!dataBase[argp->name].empty()) {
+		std::cout << "User wants to load data after altering DB\n" << argp->name << std::endl;
+		result = ERROR;
+		return &result;
+	}
 
 	std::cout << "User wants to load DB from file: " << argp->name << std::endl;
 	std::stringstream ss(argp->dataJson);
 	int dataId;
-	dataBase[argp->name].clear();	
+	dataBase[argp->name].clear();
+	
+	// Citirea datelor din fisier (string-ul cu continutul fisierului)
+	// Inserez datele in DB
 	while (ss >> dataId) {
 		struct SensorData data;
 		data.dataId = dataId;
@@ -299,6 +320,7 @@ load_1_svc(LoadData *argp, struct svc_req *rqstp)
 	return &result;
 }
 
+// Functie apelata de user pentru a incarca baza de date in fisier
 char **
 store_1_svc(char **argp, struct svc_req *rqstp)
 {
@@ -307,6 +329,7 @@ store_1_svc(char **argp, struct svc_req *rqstp)
 	std::cout << "User wants to store his data: " << *argp << std::endl;
 	std::string resultStr = "";
 
+	// Iau fiecare entry din map si il adaug intr-un string
 	for(std::map<int, struct SensorData>::iterator iter = dataBase[*argp].begin(); iter != dataBase[*argp].end(); ++iter) {
 		int dataId = iter->first;
 		resultStr += std::to_string(dataId) + ' ';
@@ -319,24 +342,21 @@ store_1_svc(char **argp, struct svc_req *rqstp)
 		resultStr += "\n";
 	}
 
-
-	/*
-	 * insert server code here
-	 */
+	// Trimit stringul la client si acesta il scrie in fisier
 	result = (char *) calloc(resultStr.size() + 1, sizeof(char));	
 	strcpy(result, resultStr.c_str());
 	return &result;
 }
 
+
+// Functie apelata de user pentru a se loga
 int *
 login_1_svc(char **argp, struct svc_req *rqstp)
 {
-	static int  result;
-
-	/*
-	 * insert server code here
-	 */
-
+	static int result;
+	result = OK;
+	
+	// Verific daca userul este logat
 	if (loggedUsers.find(*argp) == loggedUsers.end()) {
 		std::cout << "User logged in: " << *argp << std::endl;
 		loggedUsers[*argp] = currentId;
@@ -351,14 +371,13 @@ login_1_svc(char **argp, struct svc_req *rqstp)
 	return &result;
 }
 
+// Functie apelata de user pentru a se deloga
 int *
 logout_1_svc(char **argp, struct svc_req *rqstp)
 {
-	static int  result = SUCCESS;
+	static int result = OK;
 
-	/*
-	 * insert server code here
-	 */
+	// Verific daca userul e logat
 	if (loggedUsers.find(*argp) == loggedUsers.end()) {
 		std::cout << "User is not logged in: " << *argp << std::endl;
 		result = ERROR;
@@ -369,10 +388,10 @@ logout_1_svc(char **argp, struct svc_req *rqstp)
 		result = OK;
 	}
 
-
 	return &result;
 }
 
+// Functie apelata de user pentru a citit tot DB-ul lui
 char **
 readall_1_svc(char **argp, struct svc_req *rqstp)
 {
@@ -381,7 +400,7 @@ readall_1_svc(char **argp, struct svc_req *rqstp)
 	std::cout << "User wants to read all of his data: " << *argp << std::endl;
 	std::string resultStr = "Here is your data:\n[";
 
-		
+	// Parcurg fiecare entry din DB si il adaug in string
 	for(std::map<int, struct SensorData>::iterator iter = dataBase[*argp].begin(); iter != dataBase[*argp].end(); ++iter) {
 		int dataId = iter->first;
 		resultStr += "\n{\n";
@@ -395,9 +414,7 @@ readall_1_svc(char **argp, struct svc_req *rqstp)
 
 	resultStr += "\n]\n";
 
-	/*
-	 * insert server code here
-	 */
+	// Trimit stringul la user
 	result = (char *) calloc(resultStr.size() + 1, sizeof(char));	
 	strcpy(result, resultStr.c_str());
 	return &result;

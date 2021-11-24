@@ -1,0 +1,13 @@
+login User_One
+login User_Two
+add 1 1 1
+load
+readall
+del 1
+add 1 3 0.3 0.6 0.9
+update 2 1 0.5
+readall
+getstat 1
+getstat 0
+del 0
+logout

@@ -1,0 +1,18 @@
+login User_One
+add 0 2 1554464.78 26.8
+read 0
+add 0 1 1
+update 0 3 15544478 18.5 20
+read 0
+update 1 1 17.64
+update 2 1 34.7
+update 0 2 15384793 37.5
+update 3 2 1.5 3.9
+add 3 1 0
+readall
+del 5
+del 3
+del 1
+getstatall
+store
+logout
