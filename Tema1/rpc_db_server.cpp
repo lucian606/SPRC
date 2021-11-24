@@ -230,6 +230,7 @@ getstat_1_svc(struct SpecificId *argp, struct svc_req *rqstp)
 	float median = getMedian(dataBase[argp->name][argp->dataId].value.value_val, size);
 
 	std::string stringRes = "Here are the stats:\n";
+	stringRes += "  Data Id: " + std::to_string(argp->dataId) + '\n';
 	stringRes += "  Min value: " + std::to_string(min) + "\n";
 	stringRes += "  Max value: " + std::to_string(max) + "\n";
 	stringRes += "  Mean value: " + std::to_string(mean) + "\n";	
