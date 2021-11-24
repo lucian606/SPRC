@@ -1,0 +1,78 @@
+342C1 ILIESCU_LUCIAN_MARIUS
+
+In fisierul de interfata .x am definit mai multe structuri
+necesare in transmiterea parametrilor functiilor.
+Majoritatea structurilor contin un string pentru numele clientului pentru
+a sti mai usor cine a facut request si ce baza de date modific.
+
+Logica clientului:
+
+Fac o bucla while in care citesc comenzi, pana cand dau logout,
+pentru a opri executia clientului.
+
+Logica serverului:
+
+Am doua mapuri, unul cu userii logati si altul cu baza de date a
+fiecarui user. Fiecare baza de date reprezinta un map unde id-ul
+entry-ului este cheia, pentru simplitatea operatiilor.
+
+Logica functiilor:
+
+Login 
+- retin in server un map cu userii logati si cheia de autentificare
+- cand un user se logheaza acesta e adaugat in map daca nu este deja
+- daca userul e in map, atunci returnez eroare
+
+Logout
+- scot userul din map
+- eliberez baza de date a userului
+- termin programul clientului
+
+Store
+- serverul va trimite clientului un string cu baza lui de date
+- formatul va fi urmatorul:
+    ID_Entry No_Values Val_1 Val_2 ...
+- se suprascrie fisierul utilizatorului
+
+Load:
+- citesc fisierul si trimit strignul la server
+- serverul va citi din streamul stringului primit de la client tinand
+  cont de formatul dat
+- pe masura ce se citesc datele unui entry acesta este adaugat
+- daca baza de date a fost modificata se returneaza eroare
+
+Add:
+- trimit la server numele userului si entry-ul adaugat
+- serverul adauga in map-ul userului entry-ul
+- daca id-ul exista deja in map returnez eroare
+
+Update:
+- similar cu add
+- diferenta fata de add este ca in loc sa returnez eroare, voi updata valoarea
+
+Del:
+- trimit la server numele si id-ul
+- verific daca exista id-ul (daca nu -> eroare)
+- daca exista, sterg entry-ul cu id-ul din db-ul userului
+
+Read:
+- trimit la server id-ul pe care il citesc (cu numele)
+- serverul verifica daca exista id-ul in DB-ul userului
+  (daca nu exista -> eroare)
+- returnez la user sirul cu datele
+
+ReadAll:
+- similar cu read, doar ca trimit la server numele clientului
+- iterez prin tot db-ul clientului si adaug la un string datele
+- trimit stringul la client
+
+GetStat:
+- similar cu read, doar ca in loc sa returnez datele, returnez statisticile
+
+GetStatAll:
+- similar cu readAll, dar la fel, returnez statisticile
+
+Am creat 3 teste: test01.txt test02.txt test03.txt
+
+La primul test am folosit date reale din urmatorul paper (documentatie de specialitate):
+http://www.diva-portal.org/smash/get/diva2:1325707/FULLTEXT01.pdf
