@@ -120,6 +120,7 @@ def getCity(id):
     return response.json()
 
 def deleteCity(id):
+    print(f'Deleting city with id: {id}')
     url = f'{host}/cities/{id}'
     response = requests.delete(url)
     return response.json()
@@ -138,8 +139,20 @@ def addTemperature(temperature):
     response = requests.post(url, json=temperature)
     return response.json()
 
+def deleteTemperature(id):
+    print(f'Deleting temperature with id: {id}')
+    url = f'{host}/temperatures/{id}'
+    response = requests.delete(url)
+    return response.json()
+
+def deleteAllTemperatures():
+    for temperature in getTemperatures():
+        deleteTemperature(temperature['id'])
+
 print('Clearing the DB')
 deleteAllCountries()
+deleteAllCities()
+deleteAllTemperatures()
 print(getCountries())
 print(getCities())
 #print(getTemperatures())
@@ -158,13 +171,14 @@ for i in range(len(cities)):
     print(res)
     city_ids.append(res['id'])
 print(getCities())
-# for i in range(len(temperatures)):
-#     temperatures[i]['id_oras'] = city_ids[i]
-#     temperature = temperatures[i]
-#     print(f'Adding {temperature["valoare"]}')
-#     res = addTemperature(temperature)
-#     print(res)
-#     temperature_ids.append(res['id'])
-# print(getCountries())
-# print(getCities())
-# print(getTemperatures())
+for i in range(len(temperatures)):
+    temperatures[i]['id_oras'] = city_ids[i]
+    temperature = temperatures[i]
+    print(f'Adding {temperature["valoare"]}')
+    res = addTemperature(temperature)
+    print(res)
+    temperature_ids.append(res['id'])
+deleteAllCities()
+print(getCountries())
+print(getCities())
+print(getTemperatures())

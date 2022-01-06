@@ -2,16 +2,17 @@ const mongoose = require('mongoose');
 
 const TemperatureSchema = new mongoose.Schema({
     id: {
-        type: Number,
-        default: Date.now,
-        unique: true
+        type: String,
+        default: function () { return new mongoose.Types.ObjectId()},
+        unique: true,
+        auto: true
     },
     valoare: {
         type: Number,
         required: true
     },
     id_oras: {
-        type: Number,
+        type: String,
         required: true
     },
     timestamp: {

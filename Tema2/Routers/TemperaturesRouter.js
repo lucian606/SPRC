@@ -16,4 +16,11 @@ router.post('/', function(req, res) {
     });
 });
 
+router.delete('/:id', function(req, res) {
+    deleteTemperature(req.params.id).then(result => {
+        res.status(result.code);
+        res.send(result.data);
+    });
+});
+
 module.exports = router;

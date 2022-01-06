@@ -2,12 +2,14 @@ const mongoose = require('mongoose');
 
 const CitySchema = new mongoose.Schema({
     id: {
-        type: Number,
-        default: Date.now,
-        unique: true
+        type: String,
+        default: function () { return new mongoose.Types.ObjectId()},
+        unique: true,
+        auto: true
     },
     idTara: {
-        type: Number
+        type: String,
+        required: true
     },
     nume: {
         type: String,

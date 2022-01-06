@@ -1,5 +1,6 @@
 const Cities = require('../Models/Cities');
 const Countries = require('../Models/Countries');
+const Temperatures = require('../Models/Temperatures');
 const createMessage = require('./CommonApi')
 
 async function getAllCities() {
@@ -90,10 +91,14 @@ async function deleteCity(id) {
         result.data = createMessage("City not found");
     } else {
         try {
-            let countryId = existingCity[0].idTara;
+            existingCity = existingCity[0];
+            let countryId = existingCity.idTara;
             let country = await Countries.find({id: countryId});
             let country_cities = country[0].orase.filter(cityId => cityId != id);
             await Countries.findOneAndUpdate({id: countryId}, {orase: country_cities}, {upsert : false, useFindAndModify: false, runValidators : true});
+            for (let i = 0; i < existingCity.temperaturi.length; i++) {
+                await Temperatures.findOneAndDelete({id: existingCity.temperaturi[i]});
+            }
             await Cities.findOneAndDelete({id: id});
             result.code = 200;
             result.data = createMessage("City deleted");

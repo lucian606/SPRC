@@ -2,9 +2,10 @@ const mongoose = require('mongoose');
 
 const CountrySchema = new mongoose.Schema({
     id: {
-        type: Number,
-        default: Date.now,
-        unique: true
+        type: String,
+        default: function () { return new mongoose.Types.ObjectId()},
+        unique: true,
+        auto: true
     },
     nume: {
         type: String,
