@@ -23,4 +23,11 @@ router.delete('/:id', function(req, res) {
     });
 });
 
+router.put('/:id', function(req, res) {
+    updateTemperature(req.params.id, req.body).then(result => {
+        res.status(result.code);
+        res.send(result.data);
+    });
+});
+
 module.exports = router;

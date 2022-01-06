@@ -75,6 +75,27 @@ temperatures = [
     }
 ]
 
+new_temperatures = [
+    {
+        'valoare' : 69.2
+    },
+    {
+        'valoare' : 69.2
+    },
+    {
+        'valoare' : 69.2
+    },
+    {
+        'valoare' : 69.2
+    },
+    {
+        'valoare' : 69.2
+    },
+    {
+        'valoare' : 69.2
+    },
+]
+
 country_ids = []
 city_ids = []
 temperature_ids = []
@@ -110,6 +131,7 @@ def getCities():
     return response.json()
 
 def addCity(city):
+    print(f'Adding {city["nume"]}')
     url = f'{host}/cities'
     response = requests.post(url, json=city)
     return response.json()
@@ -135,6 +157,7 @@ def getTemperatures():
     return response.json()
 
 def addTemperature(temperature):
+    print(f'Adding {temperature["valoare"]}')
     url = f'{host}/temperatures'
     response = requests.post(url, json=temperature)
     return response.json()
@@ -148,6 +171,12 @@ def deleteTemperature(id):
 def deleteAllTemperatures():
     for temperature in getTemperatures():
         deleteTemperature(temperature['id'])
+
+def updateTemperature(id, temperature):
+    print(f'Updating temperature with id: {id}')
+    url = f'{host}/temperatures/{id}'
+    response = requests.put(url, json=temperature)
+    return response.json()
 
 print('Clearing the DB')
 deleteAllCountries()
@@ -166,7 +195,6 @@ print(getCountries())
 for i in range(len(cities)):
     cities[i]['idTara'] = country_ids[i // 2]
     city = cities[i]
-    print(f'Adding {city["nume"]}')
     res = addCity(city)
     print(res)
     city_ids.append(res['id'])
@@ -174,11 +202,15 @@ print(getCities())
 for i in range(len(temperatures)):
     temperatures[i]['id_oras'] = city_ids[i]
     temperature = temperatures[i]
-    print(f'Adding {temperature["valoare"]}')
     res = addTemperature(temperature)
     print(res)
     temperature_ids.append(res['id'])
+for i in range(len(temperature_ids)):
+    res = updateTemperature(temperature_ids[i], new_temperatures[i])
+    print(res)
+print(getTemperatures())
 deleteAllCities()
 print(getCountries())
 print(getCities())
 print(getTemperatures())
+deleteAllCountries()

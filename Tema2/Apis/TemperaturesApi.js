@@ -71,4 +71,25 @@ async function deleteTemperature(id) {
     return result;
 }
 
-module.exports = {getAllTemperatures, addTemperature, deleteTemperature}
+async function updateTemperature(id, temperatureData) {
+    let result = {code: 200, data: {}};
+    let existingTemperature = await Temperatures.find({id: id});
+    if (existingTemperature.length == 0) {
+        result.code = 404;
+        result.data = createMessage("Temperature not found");
+    } else {
+        try {
+            temperatureData.id = id;
+            await Temperatures.findOneAndUpdate({id: id},  {$set: temperatureData}, {upsert : false, useFindAndModify: false, runValidators : true});
+            result.code = 200;
+            result.data = createMessage("Temperature updated");
+        } catch (error) {
+            console.log(error);
+            result.code = 400;
+            result.data = createMessage("Invalid temperature body for temperature update request");
+        }
+    }
+    return result;
+}
+
+module.exports = {getAllTemperatures, addTemperature, deleteTemperature, updateTemperature};
