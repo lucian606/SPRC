@@ -141,10 +141,21 @@ def getCity(id):
     response = requests.get(url)
     return response.json()
 
+def getCountryCities(id):
+    url = f'{host}/cities/country/{id}'
+    response = requests.get(url)
+    return response.json()
+
 def deleteCity(id):
     print(f'Deleting city with id: {id}')
     url = f'{host}/cities/{id}'
     response = requests.delete(url)
+    return response.json()
+
+def updateCity(id, city):
+    print(f'Updating city with id: {id}')
+    url = f'{host}/cities/{id}'
+    response = requests.put(url, json=city)
     return response.json()
 
 def deleteAllCities():
@@ -178,39 +189,112 @@ def updateTemperature(id, temperature):
     response = requests.put(url, json=temperature)
     return response.json()
 
-print('Clearing the DB')
-deleteAllCountries()
-deleteAllCities()
-deleteAllTemperatures()
-print(getCountries())
-print(getCities())
-#print(getTemperatures())
-print('Testing:')
-for country in countries:
-    print(f'Adding {country["nume"]}')
-    res = addCountry(country)
-    print(res)
-    country_ids.append(res['id'])
-print(getCountries())
-for i in range(len(cities)):
-    cities[i]['idTara'] = country_ids[i // 2]
-    city = cities[i]
-    res = addCity(city)
-    print(res)
-    city_ids.append(res['id'])
-print(getCities())
-for i in range(len(temperatures)):
-    temperatures[i]['id_oras'] = city_ids[i]
-    temperature = temperatures[i]
-    res = addTemperature(temperature)
-    print(res)
-    temperature_ids.append(res['id'])
-for i in range(len(temperature_ids)):
-    res = updateTemperature(temperature_ids[i], new_temperatures[i])
-    print(res)
-print(getTemperatures())
-deleteAllCities()
-print(getCountries())
-print(getCities())
-print(getTemperatures())
-deleteAllCountries()
+def runFirstTest():
+    print('Clearing the DB')
+    deleteAllCountries()
+    deleteAllCities()
+    deleteAllTemperatures()
+    print(getCountries())
+    print(getCities())
+    #print(getTemperatures())
+    print('Testing:')
+    for country in countries:
+        print(f'Adding {country["nume"]}')
+        res = addCountry(country)
+        print(res)
+        country_ids.append(res['id'])
+    print(getCountries())
+    for i in range(len(cities)):
+        cities[i]['idTara'] = country_ids[i // 2]
+        city = cities[i]
+        res = addCity(city)
+        print(res)
+        city_ids.append(res['id'])
+    print(getCities())
+    for i in range(len(temperatures)):
+        temperatures[i]['id_oras'] = city_ids[i]
+        temperature = temperatures[i]
+        res = addTemperature(temperature)
+        print(res)
+        temperature_ids.append(res['id'])
+    for i in range(len(temperature_ids)):
+        res = updateTemperature(temperature_ids[i], new_temperatures[i])
+        print(res)
+    print(getTemperatures())
+    deleteAllCities()
+    print(getCountries())
+    print(getCities())
+    print(getTemperatures())
+    deleteAllCountries()
+
+def runSecondTest():
+    print('Clearing the DB')
+    deleteAllCountries()
+    deleteAllCities()
+    deleteAllTemperatures()
+    print(getCountries())
+    print(getCities())
+    print(getTemperatures())
+    print('Testing:')
+    for country in countries:
+        print(f'Adding {country["nume"]}')
+        res = addCountry(country)
+        print(res)
+        country_ids.append(res['id'])
+    print(getCountries())
+    for i in range(len(cities)):
+        cities[i]['idTara'] = country_ids[i // 2]
+        city = cities[i]
+        res = addCity(city)
+        print(res)
+        city_ids.append(res['id'])
+    print(getCities())
+    print("Update")
+    for i in range(len(city_ids)):
+        res = updateCity(city_ids[i], {'idTara' : country_ids[0]})
+        print(res)
+    for country in country_ids:
+        res = getCountryCities(country)
+        print(res)
+    print(getCities())
+    deleteAllCountries()
+
+def runThirdTest():
+    print('Clearing the DB')
+    deleteAllCountries()
+    deleteAllCities()
+    deleteAllTemperatures()
+    print(getCountries())
+    print(getCities())
+    print(getTemperatures())
+    print('Testing:')
+    for country in countries:
+        print(f'Adding {country["nume"]}')
+        res = addCountry(country)
+        print(res)
+        country_ids.append(res['id'])
+    for i in range(len(cities)):
+        cities[i]['idTara'] = country_ids[i // 2]
+        city = cities[i]
+        res = addCity(city)
+        print(res)
+        city_ids.append(res['id'])
+    for i in range(len(temperatures)):
+        temperatures[i]['id_oras'] = city_ids[i]
+        temperature = temperatures[i]
+        res = addTemperature(temperature)
+        print(res)
+        temperature_ids.append(res['id'])
+    print(getCities())
+    print("Update")
+    for i in range(len(temperature_ids)):
+        res = updateTemperature(temperature_ids[i], {'id_oras' : city_ids[0]})
+        print(res)
+    print(getCities())
+    deleteAllCountries()
+    #deleteAllCities()
+    print(getCountries())
+    print(getCities())
+    print(getTemperatures())
+
+runThirdTest()

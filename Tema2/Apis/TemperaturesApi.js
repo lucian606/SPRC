@@ -65,7 +65,7 @@ async function deleteTemperature(id) {
         }
     } catch (error) {
         console.log(error);
-        result.code = 500;
+        result.code = 400;
         result.data = createMessage("Error deleting temperature");
     }
     return result;
@@ -77,9 +77,22 @@ async function updateTemperature(id, temperatureData) {
     if (existingTemperature.length == 0) {
         result.code = 404;
         result.data = createMessage("Temperature not found");
+    } else if (temperatureData.id != undefined && temperatureData.id != id) {
+        result.code = 400;
+        result.data = createMessage("Invalid body for temperature update");
     } else {
         try {
             temperatureData.id = id;
+            if (temperatureData.id_oras != undefined && temperatureData.id_oras != existingTemperature[0].id_oras) {
+                let city = await Cities.find({id: temperatureData.id_oras});
+                let city_temperatures = city[0].temperaturi;
+                city_temperatures.push(id);
+                await Cities.findOneAndUpdate({id: temperatureData.id_oras}, {temperaturi: city_temperatures});
+                let oldCity = await Cities.find({id: existingTemperature[0].id_oras});
+                city_temperatures = oldCity[0].temperaturi;
+                city_temperatures = city_temperatures.filter(tempId => tempId != id);
+                await Cities.findOneAndUpdate({id: existingTemperature[0].id_oras}, {temperaturi: city_temperatures});
+            }
             await Temperatures.findOneAndUpdate({id: id},  {$set: temperatureData}, {upsert : false, useFindAndModify: false, runValidators : true});
             result.code = 200;
             result.data = createMessage("Temperature updated");

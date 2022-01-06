@@ -47,13 +47,16 @@ async function addCity(cityData) {
 }
 
 async function getCitiesOfCountry(idTara) {
-    console.log(idTara);
-    console.log("CEVA");
     let result = {code: 200, data: {}};
     try {
         let country = await Countries.find({id: idTara});
-        let cities = await Cities.find({id: {$in: country[0].orase}}, {_id: 0});
-        result.data  = cities;
+        if (country.length == 0) {
+            result.code = 404;
+            result.data = createMessage("Country not found");
+        } else {
+            let cities = await Cities.find({id: {$in: country[0].orase}}, {_id: 0});
+            result.data  = cities;
+        }
     } catch (error) {
         console.log(error);
         result.code = 500;
@@ -68,9 +71,21 @@ async function updateCity(id, cityBody) {
     if (existingCity.length == 0) {
         result.code = 404;
         result.data = createMessage("City not found");
+    } else if (cityBody.id != undefined && cityBody.id != id) {
+        result.code = 400;
+        result.data = createMessage("Invalid body for city update");
     } else {
         try {
             cityBody.id = id;
+            if (cityBody.idTara != undefined && cityBody.idTara != existingCity[0].idTara) {
+                let country = await Countries.find({id: cityBody.idTara});
+                let country_cities = country[0].orase;
+                country_cities.push(cityBody.id);
+                await Countries.findOneAndUpdate({id: cityBody.idTara}, {orase: country_cities}, {upsert : false, useFindAndModify: false, runValidators : true});
+                let oldCountry = await Countries.find({id: existingCity[0].idTara});
+                country_cities = oldCountry[0].orase.filter(cityId => cityId != cityBody.id);
+                await Countries.findOneAndUpdate({id: existingCity[0].idTara}, {orase: country_cities}, {upsert : false, useFindAndModify: false, runValidators : true});
+            }
             await Cities.findOneAndUpdate({id: id}, {$set: cityBody}, {upsert : false, useFindAndModify: false, runValidators : true})
             result.code = 200;
             result.data = createMessage("City updated");

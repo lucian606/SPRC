@@ -1,6 +1,7 @@
 const Countries = require('../Models/Countries');
 const Cities = require('../Models/Cities');
-const createMessage = require('./CommonApi')    
+const createMessage = require('./CommonApi');    
+const { deleteCity } = require('./CitiesApi');
 
 async function getAllCountries() {
     let result = {code: 200, data: {}};
@@ -45,7 +46,7 @@ async function deleteCountry(countryId) {
         try {
             existingCountry = existingCountry[0];
             for (let i = 0; i < existingCountry.orase.length; i++) {
-                await Cities.deleteOne({id: existingCountry.orase[i]});
+                await deleteCity(existingCountry.orase[i]);
             }
             await Countries.findOneAndDelete({id: countryId});
             result.code = 200;
