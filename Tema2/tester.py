@@ -7,8 +7,8 @@ host = f'http://localhost:{port}/api'
 countries = [
 {
     'nume': 'Poland',
-    'lat': 52.22977,
-    'lon': 21.01178
+    'lat': 52.23,
+    'lon': 21.01
 },
 {
     'nume': 'Romania',
@@ -163,7 +163,12 @@ def deleteAllCities():
         deleteCity(city['id'])
 
 def getTemperatures():
-    url = f'{host}/temperatures'
+    url = f'{host}/temperatures?from=2012-01-01&until=2022-12-31&lat=44.4267'
+    response = requests.get(url)
+    return response.json()
+
+def getCityTemperatures(id):
+    url = f'{host}/temperatures/cities/{id}?from=2012-01-01'
     response = requests.get(url)
     return response.json()
 
@@ -195,9 +200,6 @@ def runFirstTest():
     deleteAllCities()
     deleteAllTemperatures()
     print(getCountries())
-    print(getCities())
-    #print(getTemperatures())
-    print('Testing:')
     for country in countries:
         print(f'Adding {country["nume"]}')
         res = addCountry(country)
@@ -212,20 +214,21 @@ def runFirstTest():
         city_ids.append(res['id'])
     print(getCities())
     for i in range(len(temperatures)):
-        temperatures[i]['id_oras'] = city_ids[i]
+        temperatures[i]['id_oras'] = city_ids[0]
+        if (i % 2):
+            temperatures[i]['timestamp'] = i
         temperature = temperatures[i]
         res = addTemperature(temperature)
         print(res)
         temperature_ids.append(res['id'])
-    for i in range(len(temperature_ids)):
-        res = updateTemperature(temperature_ids[i], new_temperatures[i])
-        print(res)
-    print(getTemperatures())
-    deleteAllCities()
-    print(getCountries())
     print(getCities())
-    print(getTemperatures())
-    deleteAllCountries()
+    print(getCityTemperatures(city_ids[0]))
+    #print(getTemperatures())
+    #deleteAllCities()
+    #deleteAllCountries()
+    # print(getCountries())
+    # print(getCities())
+    # print(getTemperatures())
 
 def runSecondTest():
     print('Clearing the DB')
@@ -297,4 +300,4 @@ def runThirdTest():
     print(getCities())
     print(getTemperatures())
 
-runThirdTest()
+runFirstTest()

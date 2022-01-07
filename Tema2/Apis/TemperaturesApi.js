@@ -3,11 +3,88 @@ const Cities = require('../Models/Cities');
 const Temperatures = require('../Models/Temperatures');
 const createMessage = require('./CommonApi');
 
-async function getAllTemperatures() {
+async function getAllTemperatures(filters) {
     let result = {code: 200, data: {}};
     try {
-        let temperatures = await Temperatures.find({}, {_id: 0});
-        result.data = temperatures;
+        let temperature_filters = {timestamp : {}};
+        let city_filters = {};
+        if (filters.from != undefined) {
+            temperature_filters.timestamp.$gt = filters.from;
+        }
+        if (filters.until != undefined) {
+            temperature_filters.timestamp.$lt = filters.until;
+        }
+        if (filters.lat != undefined) {
+            city_filters.lat = filters.lat;
+        }
+        if (filters.lon != undefined) {
+            city_filters.lon = filters.lon;
+        }
+        console.log(city_filters)
+        console.log(temperature_filters);
+        let temperatures = await Temperatures.find(temperature_filters, {_id: 0});
+        let data = [];
+        let citiesMap = {};
+        let cityIds = [];
+        for (let i = 0; i < temperatures.length; i++) {
+            cityIds.push(temperatures[i].id_oras);
+        }
+        city_filters.id = {$in: cityIds};
+        let cities = await Cities.find(city_filters, {_id: 0});
+        for (let i = 0; i < cities.length; i++) {
+            citiesMap[cities[i].id] = cities[i];
+        }
+        for (let i = 0; i < temperatures.length; i++) {
+            city = citiesMap[temperatures[i].id_oras];
+            if (city != undefined) {
+                data.push({
+                    id: temperatures[i].id,
+                    idTara: city.idTara,
+                    nume: city.nume,
+                    lat: city.lat,
+                    lon: city.lon
+                });
+            }
+        }
+        result.data = data;
+    } catch (error) {
+        console.log(error);
+        result.code = 500;
+        result.data = createMessage("Error getting temperatures");
+    }
+    return result;
+}
+
+async function getCityTemperatures(id, filters) {
+    let result = {code: 200, data: {}};
+    try {
+        let city = await Cities.find({id: id});
+        if (city.length == 0) {
+            result.code = 404;
+            result.data = createMessage("City not found");
+        } else {
+            city = city[0];
+            let data = [];
+            let temperatures = city.temperaturi;
+            let temperature_filters = {id: {$in: temperatures}, timestamp: {}};
+            if (filters.from != undefined) {
+                temperature_filters.timestamp.$gt = filters.from;
+            }
+            if (filters.until != undefined) {
+                temperature_filters.timestamp.$lt = filters.until;
+            }
+            temperatures = await Temperatures.find(temperature_filters, {_id: 0});
+            for (let i = 0; i < temperatures.length; i++) {
+                data.push({
+                    id: temperatures[i].id,
+                    idTara: city.idTara,
+                    nume: city.nume,
+                    lat: city.lat,
+                    lon: city.lon
+                });
+            }
+            result.data = data;
+        }
     } catch (error) {
         console.log(error);
         result.code = 500;
@@ -105,4 +182,4 @@ async function updateTemperature(id, temperatureData) {
     return result;
 }
 
-module.exports = {getAllTemperatures, addTemperature, deleteTemperature, updateTemperature};
+module.exports = {getAllTemperatures, getCityTemperatures, addTemperature, deleteTemperature, updateTemperature};
