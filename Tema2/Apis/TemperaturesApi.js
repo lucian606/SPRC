@@ -1,13 +1,13 @@
 const Countries = require('../Models/Countries');
 const Cities = require('../Models/Cities');
 const Temperatures = require('../Models/Temperatures');
-const createMessage = require('./CommonApi');
+const {createMessage, getDate} = require('./CommonApi');
 
 async function getAllTemperatures(filters) {
     let result = {code: 200, data: {}};
     try {
         let temperature_filters = {timestamp : {}};
-        let city_filters = {lat:{}, lon:{}};
+        let city_filters = {};
         if (filters.from != undefined) {
             temperature_filters.timestamp.$gt = filters.from;
         }
@@ -22,7 +22,7 @@ async function getAllTemperatures(filters) {
         }
         if (Object.keys(temperature_filters.timestamp).length == 0) {
             delete temperature_filters.timestamp;
-        }        
+        }
         let temperatures = await Temperatures.find(temperature_filters, {_id: 0});
         let data = [];
         let citiesMap = {};
@@ -31,10 +31,10 @@ async function getAllTemperatures(filters) {
             cityIds.push(temperatures[i].id_oras);
         }
         city_filters.id = {$in: cityIds};
-        if (Object.keys(city_filters.lat).length == 0) {
+        if (city_filters.lat == undefined) {
             delete city_filters.lat;
         }
-        if (Object.keys(city_filters.lon).length == 0) {
+        if (city_filters.lon == undefined) {
             delete city_filters.lon;
         }
         let cities = await Cities.find(city_filters, {_id: 0});
@@ -46,10 +46,8 @@ async function getAllTemperatures(filters) {
             if (city != undefined) {
                 data.push({
                     id: temperatures[i].id,
-                    idTara: city.idTara,
-                    nume: city.nume,
-                    lat: city.lat,
-                    lon: city.lon
+                    timestamp: getDate(temperatures[i].timestamp),
+                    valoare: temperatures[i].valoare
                 });
             }
         }
@@ -87,10 +85,8 @@ async function getCityTemperatures(id, filters) {
             for (let i = 0; i < temperatures.length; i++) {
                 data.push({
                     id: temperatures[i].id,
-                    idTara: city.idTara,
-                    nume: city.nume,
-                    lat: city.lat,
-                    lon: city.lon
+                    timestamp: getDate(temperatures[i].timestamp),
+                    valoare: temperatures[i].valoare
                 });
             }
             result.data = data;

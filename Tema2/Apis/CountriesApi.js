@@ -1,6 +1,6 @@
 const Countries = require('../Models/Countries');
 const Cities = require('../Models/Cities');
-const createMessage = require('./CommonApi');    
+const {createMessage, getDate} = require('./CommonApi');
 const { deleteCity } = require('./CitiesApi');
 
 async function getAllCountries() {

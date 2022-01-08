@@ -1,12 +1,12 @@
 const Cities = require('../Models/Cities');
 const Countries = require('../Models/Countries');
 const Temperatures = require('../Models/Temperatures');
-const createMessage = require('./CommonApi')
+const {createMessage, getDate} = require('./CommonApi');
 
 async function getAllCities() {
     let result = {code: 200, data: {}};
     try {
-        let cities = await Cities.find({}, {_id: 0});
+        let cities = await Cities.find({}, {_id: 0, temperaturi: 0});
         result.data = cities;
     } catch (error) {
         console.log(error);
@@ -54,7 +54,7 @@ async function getCitiesOfCountry(idTara) {
             result.code = 404;
             result.data = createMessage("Country not found");
         } else {
-            let cities = await Cities.find({id: {$in: country[0].orase}}, {_id: 0});
+            let cities = await Cities.find({id: {$in: country[0].orase}}, {_id: 0, temperaturi: 0});
             result.data  = cities;
         }
     } catch (error) {

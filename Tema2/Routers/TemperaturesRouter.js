@@ -91,6 +91,7 @@ router.get('/countries/:id', function(req, res) {
 })   
 
 router.post('/', function(req, res) {
+    req.body.id_oras = req.body.idOras;
     addTemperature(req.body).then(result => {
         res.status(result.code);
         res.send(result.data);
