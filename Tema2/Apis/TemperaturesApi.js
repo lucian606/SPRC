@@ -7,7 +7,7 @@ async function getAllTemperatures(filters) {
     let result = {code: 200, data: {}};
     try {
         let temperature_filters = {timestamp : {}};
-        let city_filters = {};
+        let city_filters = {lat:{}, lon:{}};
         if (filters.from != undefined) {
             temperature_filters.timestamp.$gt = filters.from;
         }
@@ -20,8 +20,9 @@ async function getAllTemperatures(filters) {
         if (filters.lon != undefined) {
             city_filters.lon = filters.lon;
         }
-        console.log(city_filters)
-        console.log(temperature_filters);
+        if (Object.keys(temperature_filters.timestamp).length == 0) {
+            delete temperature_filters.timestamp;
+        }        
         let temperatures = await Temperatures.find(temperature_filters, {_id: 0});
         let data = [];
         let citiesMap = {};
@@ -30,6 +31,12 @@ async function getAllTemperatures(filters) {
             cityIds.push(temperatures[i].id_oras);
         }
         city_filters.id = {$in: cityIds};
+        if (Object.keys(city_filters.lat).length == 0) {
+            delete city_filters.lat;
+        }
+        if (Object.keys(city_filters.lon).length == 0) {
+            delete city_filters.lon;
+        }
         let cities = await Cities.find(city_filters, {_id: 0});
         for (let i = 0; i < cities.length; i++) {
             citiesMap[cities[i].id] = cities[i];
@@ -73,6 +80,9 @@ async function getCityTemperatures(id, filters) {
             if (filters.until != undefined) {
                 temperature_filters.timestamp.$lt = filters.until;
             }
+            if (Object.keys(temperature_filters.timestamp).length == 0) {
+                delete temperature_filters.timestamp;
+            }
             temperatures = await Temperatures.find(temperature_filters, {_id: 0});
             for (let i = 0; i < temperatures.length; i++) {
                 data.push({
@@ -82,6 +92,30 @@ async function getCityTemperatures(id, filters) {
                     lat: city.lat,
                     lon: city.lon
                 });
+            }
+            result.data = data;
+        }
+    } catch (error) {
+        console.log(error);
+        result.code = 500;
+        result.data = createMessage("Error getting temperatures");
+    }
+    return result;
+}
+
+async function getCountryTemperatures(id, filters) {
+    let result = {code: 200, data: {}};
+    try {
+        let country = await Countries.find({id: id});
+        if (country.length == 0) {
+            result.code = 404;
+            result.data = createMessage("Country not found");
+        } else {
+            let cities = country[0].orase;
+            let data = [];
+            for (let i = 0; i < cities.length; i++) {
+                let city_temperatures = await getCityTemperatures(cities[i], filters);
+                data = data.concat(city_temperatures.data);
             }
             result.data = data;
         }
@@ -182,4 +216,4 @@ async function updateTemperature(id, temperatureData) {
     return result;
 }
 
-module.exports = {getAllTemperatures, getCityTemperatures, addTemperature, deleteTemperature, updateTemperature};
+module.exports = {getAllTemperatures, getCityTemperatures, getCountryTemperatures, addTemperature, deleteTemperature, updateTemperature};

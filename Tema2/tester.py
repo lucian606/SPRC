@@ -168,7 +168,12 @@ def getTemperatures():
     return response.json()
 
 def getCityTemperatures(id):
-    url = f'{host}/temperatures/cities/{id}?from=2012-01-01'
+    url = f'{host}/temperatures/cities/{id}'
+    response = requests.get(url)
+    return response.json()
+
+def getCountryTemperatures(id):
+    url = f'{host}/temperatures/countries/{id}'
     response = requests.get(url)
     return response.json()
 
@@ -214,18 +219,20 @@ def runFirstTest():
         city_ids.append(res['id'])
     print(getCities())
     for i in range(len(temperatures)):
-        temperatures[i]['id_oras'] = city_ids[0]
+        temperatures[i]['id_oras'] = city_ids[i]
         if (i % 2):
             temperatures[i]['timestamp'] = i
         temperature = temperatures[i]
         res = addTemperature(temperature)
         print(res)
         temperature_ids.append(res['id'])
-    print(getCities())
-    print(getCityTemperatures(city_ids[0]))
+    #print(getCities())
+    #print(getCityTemperatures(city_ids[0]))
+    #print(getCountryCities(country_ids[0]))
+    #print(getCountryTemperatures(country_ids[0]))
     #print(getTemperatures())
-    #deleteAllCities()
-    #deleteAllCountries()
+    # deleteAllCities()
+    deleteAllCountries()
     # print(getCountries())
     # print(getCities())
     # print(getTemperatures())

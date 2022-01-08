@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const {getAllTemperatures, addTemperature, deleteTemperature, updateTemperature, getCityTemperatures} = require('../Apis/TemperaturesApi');
+const {getAllTemperatures, getCityTemperatures, getCountryTemperatures, addTemperature, deleteTemperature, updateTemperature} = require('../Apis/TemperaturesApi');
 
 router.get('/', function(req, res) {
     let lat = req.query.lat
@@ -26,6 +26,38 @@ router.get('/', function(req, res) {
     });
 });
 
+router.get('/cities/', function(req, res) {
+    let from = req.query.from
+    let until = req.query.until
+    let filters = {}
+    if (!isNaN(new Date(from))) {
+        filters.from = new Date(from).getTime();
+    }
+    if (!isNaN(new Date(until))) {
+        filters.until = new Date(until).getTime();
+    }
+    getAllTemperatures(filters).then(result => {
+        res.status(result.code);
+        res.send(result.data);
+    });
+})
+
+router.get('/countries/', function(req, res) {
+    let from = req.query.from
+    let until = req.query.until
+    let filters = {}
+    if (!isNaN(new Date(from))) {
+        filters.from = new Date(from).getTime();
+    }
+    if (!isNaN(new Date(until))) {
+        filters.until = new Date(until).getTime();
+    }
+    getAllTemperatures(filters).then(result => {
+        res.status(result.code);
+        res.send(result.data);
+    });
+})
+
 router.get('/cities/:id', function(req, res) {
     let from = req.query.from
     let until = req.query.until
@@ -41,6 +73,22 @@ router.get('/cities/:id', function(req, res) {
         res.send(result.data);
     })
 })
+
+router.get('/countries/:id', function(req, res) {
+    let from = req.query.from
+    let until = req.query.until
+    let filters = {}
+    if (!isNaN(new Date(from))) {
+        filters.from = new Date(from).getTime();
+    }
+    if (!isNaN(new Date(until))) {
+        filters.until = new Date(until).getTime();
+    }
+    getCountryTemperatures(req.params.id, filters).then(result => {
+        res.status(result.code);
+        res.send(result.data);
+    })
+})   
 
 router.post('/', function(req, res) {
     addTemperature(req.body).then(result => {

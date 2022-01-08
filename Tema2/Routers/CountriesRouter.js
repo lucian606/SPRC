@@ -10,7 +10,6 @@ router.get('/', function(req, res) {
 });
 
 router.post('/', function(req, res) {
-    console.log(req.body);
     addCountry(req.body).then(result => {
         res.status(result.code);
         res.send(result.data);

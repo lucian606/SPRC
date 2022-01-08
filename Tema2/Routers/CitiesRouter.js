@@ -17,8 +17,10 @@ router.post('/', function(req, res) {
 });
 
 router.get('/country/', function(req, res) {
-    res.status(200);
-    res.send([]);
+    getAllCities().then(result => {
+        res.status(result.code);
+        res.send(result.data);
+    });
 });
 
 router.get('/country/:id', function(req, res) {
