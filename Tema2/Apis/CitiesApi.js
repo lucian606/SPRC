@@ -26,7 +26,7 @@ async function addCity(cityData) {
         try {
             let country = await Countries.find({id: cityData.idTara});
             if (country.length == 0) {
-                result.code = 400;
+                result.code = 404;
                 result.data = createMessage("Country not found");
             } else {
                 country = country[0];

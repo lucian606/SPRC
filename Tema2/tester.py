@@ -307,4 +307,14 @@ def runThirdTest():
     print(getCities())
     print(getTemperatures())
 
-runFirstTest()
+def runPersistentTest():
+    print(getCountries())
+    deleteAllCountries()
+    for country in countries:
+        print(f'Adding {country["nume"]}')
+        res = addCountry(country)
+        print(res)
+    print(getCountries())
+    deleteAllCountries()
+    
+runPersistentTest()

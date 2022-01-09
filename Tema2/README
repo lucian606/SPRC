@@ -1,0 +1,39 @@
+342C1 Iliescu Lucian-Marius
+
+Tema implementeaza toate cerintele din enunt.
+Pentru tehnologii am folosit nodejs + express pentru REST API si
+mongodb (pachetul mongoose) pentru baza de date.
+
+Pentru POST, fac add pe tabela respectiva.
+Pentru GET, fac find.
+Pentru PUT, fac findAndUpdate.
+Pentru DELETE, fac delete.
+
+De asemenea, pentru a simula cheile din SQL, am adaugat la tari
+un camp de orase, care contine un vector cu id-urile oraselor
+din tara respectiva. Am facut acelasi lucru si pentru Orase cu
+un vector de id-uri de temperaturi. Modificarile sunt recursive,
+atunci cand se sterge o tara, implicit se sterg orasele si 
+temperaturile din orasele respective. De asemenea cand se modifica
+id-ul de tara al unui oras se scoate orasul din tara respectiva si
+se pune in tara nou. La fel si pentru temperaturi.
+
+Pentru a face filtrele din get temperatures, folosesc un json
+pe care il populez cu filtrele necesare cautarii, iar daca
+nu sunt filtre, nu folosesc jsonul.
+
+Pentru partea de Docker am asigurat:
+    -containere diferite pt API si DB care nu sunt in reteaua   default, se afla in reteaua api-network, de asemenea ele
+    sunt in aceeasi retea pentru ca nu este posibil sa comunice
+    din retele diferite:
+    "Containers in different networks can not communicate with each other because iptables drop such packets."
+    -variabile de mediu
+    -volume pentru persistenta, datele ramanand dupa reset
+    -DNS, unde am atribuit nume containerelor pentru a putea
+    comunica mai usor intre ele
+
+Pentru rulare se face:
+    sudo docker-compose build
+    docker-compose up
+sau cu:
+    sudo docker-compose up --build
